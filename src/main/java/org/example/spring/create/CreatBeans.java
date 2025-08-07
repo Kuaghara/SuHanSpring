@@ -24,8 +24,10 @@ public class CreatBeans {
     public static Object creatBean(BeanDefinition bd){
 
         try {
+            //这步可以理解为实例化前吗？（没有去创造实例化前的那个接口的情况下）
             Constructor<?> constructor = SUHANCLASSLOADER.loadClass(bd.getClassName().toString()).getConstructor();
-        } catch (NoSuchMethodException | ClassNotFoundException e) {
+        }
+        catch (NoSuchMethodException | ClassNotFoundException e) {
             throw new RuntimeException(e);
         }
 
