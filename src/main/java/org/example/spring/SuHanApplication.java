@@ -10,19 +10,25 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
 import java.util.Map;
 
+import static org.example.spring.create.Creats.creat;
 import static org.example.spring.scan.Scans.scan;
 
 
 public class SuHanApplication {
-
     Class<?> mainConfig;
-    public static Map<String, BeanDefinition> beandefinitionMap = new HashMap<>();
-    Map<String, Object> singletonbeanMap = new HashMap<>();
+    public static Map<String, BeanDefinition> BEANDEFINITION_MAP = new HashMap<>();
+    public static Map<String, Object> SINGLETONBEAN_MAP = new HashMap<>();
+    public static ClassLoader SUHANCLASSLOADER =null;
 
 
-    public SuHanApplication(Class<? extends Object> clazz) {
+
+
+
+    public SuHanApplication(Class<?> clazz) {
+        setClassLoader(clazz.getClassLoader());
         this.mainConfig = clazz;
         scan(clazz);
+        creat();
 
     }
 
@@ -35,9 +41,9 @@ public class SuHanApplication {
         String scope = beanDefinition.getScope();
         Constructor<?> constructors = clazz.getDeclaredConstructor();
         Object object = constructors.newInstance();
-        return Autowire(object);
+        return autowire(object);
     }
-    private Object Autowire(Object object1) throws IllegalAccessException, InvocationTargetException, NoSuchMethodException, InstantiationException {
+    private Object autowire(Object object1) throws IllegalAccessException, InvocationTargetException, NoSuchMethodException, InstantiationException {
         Class<?> clazz1 = object1.getClass();
         Field[] fields = clazz1.getDeclaredFields();
         for (Field field : fields) {
@@ -45,7 +51,7 @@ public class SuHanApplication {
                 Class<?> fieldType = field.getType();
                 String beanName = null;
 
-                for (Map.Entry<String, BeanDefinition> entry : beandefinitionMap.entrySet()) {
+                for (Map.Entry<String, BeanDefinition> entry : BEANDEFINITION_MAP.entrySet()) {
                     if (entry.getValue().getClazz().equals(fieldType)) {
                         beanName = entry.getKey();
                         break;
@@ -54,9 +60,9 @@ public class SuHanApplication {
 
                 if (beanName != null) {
                     field.setAccessible(true);
-                    BeanDefinition beanDefinition = beandefinitionMap.get(beanName);
+                    BeanDefinition beanDefinition = BEANDEFINITION_MAP.get(beanName);
                     if ("singleton".equals(beanDefinition.getScope())) {
-                        field.set(object1, singletonbeanMap.get(beanName));
+                        field.set(object1, SINGLETONBEAN_MAP.get(beanName));
                     } else {
                         field.set(object1, createSingletonBean(beanDefinition));
                     }
@@ -68,13 +74,13 @@ public class SuHanApplication {
 
 
     public Object getBean(String beanName) {
-        BeanDefinition beanDefinition= beandefinitionMap.get(beanName);
+        BeanDefinition beanDefinition= BEANDEFINITION_MAP.get(beanName);
         if(beanDefinition==null){
             throw new RuntimeException(beanName+"不存在");
         }
         else{
             if(beanDefinition.getScope().equals("singleton")){
-                return singletonbeanMap.get(beanName);
+                return SINGLETONBEAN_MAP.get(beanName);
             }
             else{
                 try {
@@ -86,4 +92,9 @@ public class SuHanApplication {
             }
         }
     }
+
+    public static void setClassLoader(ClassLoader classLoader){
+        SUHANCLASSLOADER=classLoader;
+    }
+
 }

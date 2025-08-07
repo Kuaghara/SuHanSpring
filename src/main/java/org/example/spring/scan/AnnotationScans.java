@@ -12,15 +12,17 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
+import static org.example.spring.SuHanApplication.SUHANCLASSLOADER;
+
 public class AnnotationScans {
-    public static void AnnotationScan(Class<?> clazz,List<Object> generateBeanDefinition)  {
+    public static void annotationScan(Class<?> clazz,List<Object> generateBeanDefinition)  {
         ComponentScan scan = clazz.getDeclaredAnnotation(ComponentScan.class);
 
-        String basePackage = scan.value();//ComponentScan内的数值
+        String basePackage = scan.value();
         String packagePath = basePackage.replace(".", "/");
 
-        ClassLoader SuHanApplicationclassLoader = clazz.getClassLoader();
-        URL url = SuHanApplicationclassLoader.getResource(packagePath);
+
+        URL url = SUHANCLASSLOADER.getResource(packagePath);
 
         //将获取到的文件路径转换成File类型
         File file = null;
@@ -36,19 +38,19 @@ public class AnnotationScans {
                         .replace(".class", "");
 
                 //获取文件的类
-                Class<?> classLoader = null;
+                Class<?> class1 = null;
                 try {
-                    classLoader = SuHanApplicationclassLoader.loadClass(classPath);
+                    class1 = SUHANCLASSLOADER.loadClass(classPath);
                 } catch (ClassNotFoundException e) {
                     throw new RuntimeException(e);
                 }
 
                 //创建beanDefinition对象
                 try {
-                    Object b =new BeanDefinition().setClassName(classLoader);
+                    Object b =new BeanDefinition().setClassName(class1);
                     generateBeanDefinition.add(b);
                 } catch (Exception e) {
-                    throw new RuntimeException("发现了两个重复的bean：" + classLoader);
+                    throw new RuntimeException("发现了两个重复的bean：" + class1);
                 }
                 //此处为原来的逻辑，生成beanDefinition对象并将其放在map中，生成单例bean并放在单例池中
                 //更新后将步骤拆分细化，此处先进行路径的注释扫描
