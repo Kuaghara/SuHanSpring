@@ -1,7 +1,7 @@
 package org.example.spring.scan;
 
 import org.example.spring.Annotation.Bean;
-import org.example.spring.BeanDefinition;
+import org.example.spring.informationEntity.BeanDefinition;
 
 import java.lang.reflect.Method;
 import java.util.List;

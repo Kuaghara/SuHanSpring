@@ -1,10 +1,10 @@
-package org.example.spring;
+package org.example.spring.informationEntity;
 
 public class BeanDefinition {
     private Object className;
     private Class<?> clazz;
-    private String scope="singleton";
-    private String lazy="false";
+    private String scope;
+    private String lazy;
 
     public Class<?> getClazz() {
         return clazz;

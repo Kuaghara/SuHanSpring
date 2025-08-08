@@ -1,14 +1,10 @@
 package org.example.spring.scan;
 
-import org.example.spring.Annotation.Component;
 import org.example.spring.Annotation.ComponentScan;
-import org.example.spring.Annotation.Scope;
-import org.example.spring.BeanDefinition;
+import org.example.spring.informationEntity.BeanDefinition;
 
 import java.io.File;
-import java.lang.reflect.InvocationTargetException;
 import java.net.URL;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 

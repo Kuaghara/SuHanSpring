@@ -1,9 +1,6 @@
 package org.example.spring.scan;
 
-import org.example.spring.Annotation.Bean;
-import org.example.spring.BeanDefinition;
-
-import java.util.Locale;
+import org.example.spring.informationEntity.BeanDefinition;
 
 public class AnnotationBeanNameGenerator {
     public static String generateName(Object beanDefinition){

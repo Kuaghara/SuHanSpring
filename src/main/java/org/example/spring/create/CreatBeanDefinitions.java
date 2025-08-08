@@ -2,7 +2,7 @@ package org.example.spring.create;
 
 import org.example.spring.Annotation.Lazy;
 import org.example.spring.Annotation.Scope;
-import org.example.spring.BeanDefinition;
+import org.example.spring.informationEntity.BeanDefinition;
 
 import java.util.List;
 import java.util.Map;
@@ -46,7 +46,6 @@ public class CreatBeanDefinitions {
                     String lazyValue = class2.getDeclaredAnnotation(Lazy.class).value();
                     entry.getValue().setLazy(lazyValue);
                 }
-
                 //目前就只有这两个注解，就先添加这两个吧
             }
             catch (ClassNotFoundException e) {
