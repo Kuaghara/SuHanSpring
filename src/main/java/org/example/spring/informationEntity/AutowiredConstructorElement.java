@@ -1,9 +1,10 @@
 package org.example.spring.informationEntity;
 
-import java.io.File;
+import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 
-public class AutowiredFieldElement implements AutoElement{
+public class AutowiredConstructorElement implements AutoElement {
+    Constructor constructor;
     Field field;
     boolean required;
 
@@ -22,5 +23,13 @@ public class AutowiredFieldElement implements AutoElement{
 
     public void setField(Field field) {
         this.field = field;
+    }
+
+    public Constructor getConstructor() {
+        return constructor;
+    }
+
+    public void setConstructor(Constructor constructor) {
+        this.constructor = constructor;
     }
 }

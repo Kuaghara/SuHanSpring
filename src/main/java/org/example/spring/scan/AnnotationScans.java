@@ -1,9 +1,12 @@
 package org.example.spring.scan;
 
 import org.example.spring.Annotation.ComponentScan;
+import org.example.spring.Annotation.Lazy;
+import org.example.spring.Annotation.Scope;
 import org.example.spring.informationEntity.BeanDefinition;
 
 import java.io.File;
+import java.lang.annotation.Annotation;
 import java.net.URL;
 import java.util.List;
 import java.util.Objects;
@@ -43,8 +46,12 @@ public class AnnotationScans {
 
                 //创建beanDefinition对象
                 try {
-                    Object b =new BeanDefinition().setClassName(class1);
-                    generateBeanDefinition.add(b);
+                    BeanDefinition beanDefinition = new BeanDefinition();
+
+                    setbeanDefinition(class1, beanDefinition);
+
+
+                    generateBeanDefinition.add(beanDefinition);
                 } catch (Exception e) {
                     throw new RuntimeException("发现了两个重复的bean：" + class1);
                 }
@@ -92,6 +99,27 @@ public class AnnotationScans {
 //
             }
         }
+    }
+
+    public static void setbeanDefinition(Class<?> class1, BeanDefinition beanDefinition) {
+        //查找Scope注解
+        if(class1.isAnnotationPresent(Scope.class)){
+            Scope declaredAnnotation = class1.getDeclaredAnnotation(Scope.class);
+            beanDefinition.setScope(declaredAnnotation.value());
+        }
+        else {
+            beanDefinition.setScope("singleton");
+        }
+
+        //查找Lazy注解
+        if(class1.isAnnotationPresent(Lazy.class)){
+            Lazy declaredAnnotation = class1.getDeclaredAnnotation(Lazy.class);
+            beanDefinition.setLazy(declaredAnnotation.value());
+        }
+        else {
+            beanDefinition.setLazy("false");
+        }
+        beanDefinition.setClassName(class1);
     }
 
 }

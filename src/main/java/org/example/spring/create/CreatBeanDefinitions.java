@@ -5,6 +5,7 @@ import org.example.spring.Annotation.Scope;
 import org.example.spring.informationEntity.BeanDefinition;
 
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 import static org.example.spring.SuHanApplication.BEANDEFINITION_MAP;
@@ -13,7 +14,7 @@ import static org.example.spring.scan.AnnotationBeanNameGenerator.generateName;
 
 public class CreatBeanDefinitions {
 
-    public static void CreatBeanDefinitionMap(Class<?> clazz, List<Object> generateBeanDefinition) {
+    public static void creatBeanDefinitionMap(Class<?> clazz, List<Object> generateBeanDefinition) {
         ClassLoader SuhanClassLoader = clazz.getClassLoader();
         for(Object beanDefinition : generateBeanDefinition){
             String beanName = generateName(beanDefinition);

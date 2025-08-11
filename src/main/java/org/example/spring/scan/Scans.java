@@ -7,10 +7,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 
-import static org.example.spring.create.CreatBeanDefinitions.CreatBeanDefinitionMap;
+import static org.example.spring.SuHanApplication.BEANDEFINITION_MAP;
+import static org.example.spring.create.CreatBeanDefinitions.creatBeanDefinitionMap;
 
 
 import static org.example.spring.scan.AnnotationScans.annotationScan;
+import static org.example.spring.scan.AutoWiredScans.autoWiredScan;
 import static org.example.spring.scan.ConfigClassScans.configClassScan;
 
 public class Scans {
@@ -31,7 +33,11 @@ public class Scans {
 
             //此时已获得包含所有扫描出来的beanDefinition的List
             //接下来创造beanDefinition Map
-            CreatBeanDefinitionMap(clazz, GENERATEDEFINITION_LIST);
+            creatBeanDefinitionMap(clazz, GENERATEDEFINITION_LIST);
+
+            //再对beanDefinitionMap进行扫描，查找出所有包含@Autowired的属性或者方法，为将来的属性注入做准备
+            autoWiredScan(BEANDEFINITION_MAP);
+
 
         }
         else {
