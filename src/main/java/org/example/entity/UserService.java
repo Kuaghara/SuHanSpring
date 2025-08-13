@@ -4,14 +4,16 @@ package org.example.entity;
 import org.example.spring.Annotation.Autowired;
 import org.example.spring.Annotation.Component;
 import org.example.spring.Annotation.Scope;
+import org.example.spring.beanPostProcessor.InstantiationAwareBeanPostProcessor;
 
-import javax.xml.crypto.Data;
 
 @Component
 @Scope("prototype")
-public class UserService {
+public class UserService implements InstantiationAwareBeanPostProcessor {
     String name;
-    Data data;
+
+    @Autowired
+    public OldUserService old;
 
     public OldUserService getOld() {
         return old;
@@ -26,17 +28,13 @@ public class UserService {
         this.name = name;
     }
 
-    public Data getData() {
-        return data;
-    }
 
-    public void setData(Data data) {
-        this.data = data;
-    }
-
-    @Autowired
-    public OldUserService old;
     public void test(){
         System.out.println("hello world");
+    }
+
+    @Override
+    public Object postProcessBeforeInstantiation(Class<?> beanClass, String beanName) throws Exception {
+        return null;
     }
 }

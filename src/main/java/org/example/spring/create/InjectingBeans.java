@@ -16,14 +16,19 @@ import static org.example.spring.SuHanApplication.*;
 import static org.example.spring.create.CreatBeans.creatBean;
 
 public class InjectingBeans {
-    public static void injectingBean(Map<String,Object> singletonBeanMap) {
-        for ( Map.Entry<String , List<AutoElement> > entry : INJECTIONELEMENT_MAP.entrySet()){
-            for (AutoElement autoElement : entry.getValue()){
+    public static void injectingBean(String name) {
+
+        if (INJECTIONELEMENT_MAP.containsKey( name)) {
+            List<AutoElement> autoElements = INJECTIONELEMENT_MAP.get(name);
+
+            for (AutoElement autoElement : autoElements) {
 
                 injectField(autoElement);
 
             }
         }
+
+
     }
 
      private static void injectField(AutoElement autoElement) {

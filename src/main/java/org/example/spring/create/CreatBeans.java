@@ -11,22 +11,21 @@ import static org.example.spring.SuHanApplication.SINGLETONBEAN_MAP;
 import static org.example.spring.SuHanApplication.SUHANCLASSLOADER;
 
 public class CreatBeans {
-    public static void creatSingletonBean(Map<String , BeanDefinition> beandefinitionMap) {
-        for (Map.Entry<String,BeanDefinition> entry : beandefinitionMap.entrySet()){
-            BeanDefinition bd = entry.getValue();
-            if(bd.getScope().equals("prototype")|bd.getLazy().equals("true")){
+    public static void creatSingletonBean(String beanName,BeanDefinition beanDefinition) {
+
+            if(beanDefinition.getScope().equals("prototype")|beanDefinition.getLazy().equals("true")){
                 return;
             }
             else{
-                SINGLETONBEAN_MAP.put(entry.getKey(),creatBean(entry.getValue()));
+                SINGLETONBEAN_MAP.put(beanName,creatBean(beanDefinition));
             }
-        }
+
 
     }
     public static Object creatBean(BeanDefinition bd){
 
         try {
-            //这步可以理解为实例化前吗？（没有去创造实例化前的那个接口的情况下）
+
             String className = bd.getClazz().getName();
             Constructor<?>[] constructors = SUHANCLASSLOADER.loadClass(className).getConstructors();
             Constructor<?> theConstructor = null;
