@@ -35,6 +35,7 @@ public class UserService implements InstantiationAwareBeanPostProcessor {
 
     @Override
     public Object postProcessBeforeInstantiation(Class<?> beanClass, String beanName) throws Exception {
-        return null;
+        System.out.println("实例化之前");
+        return new UserService();
     }
 }

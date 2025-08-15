@@ -1,14 +1,20 @@
 package org.example.spring.create;
 
 import org.example.spring.Annotation.Autowired;
+import org.example.spring.beanPostProcessor.BeanPostProcessor;
+import org.example.spring.beanPostProcessor.InstantiationAwareBeanPostProcessor;
+import org.example.spring.beanPostProcessor.MergedBeanDefinitionPostProcessor;
 import org.example.spring.informationEntity.BeanDefinition;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.Map;
 
 import static org.example.spring.SuHanApplication.SINGLETONBEAN_MAP;
 import static org.example.spring.SuHanApplication.SUHANCLASSLOADER;
+import static org.example.spring.create.Creates.*;
+import static org.example.spring.create.InjectingBeans.injectingBean;
 
 public class CreatBeans {
     public static void creatSingletonBean(String beanName,BeanDefinition beanDefinition) {
@@ -25,7 +31,6 @@ public class CreatBeans {
     public static Object creatBean(BeanDefinition bd){
 
         try {
-
             String className = bd.getClazz().getName();
             Constructor<?>[] constructors = SUHANCLASSLOADER.loadClass(className).getConstructors();
             Constructor<?> theConstructor = null;
@@ -57,12 +62,67 @@ public class CreatBeans {
                 //这里我是真不知道怎么办了，只能返回一个无参的了
                 theConstructor = constructors[0];
             }
+            Object bean = theConstructor.newInstance();
+            if(bd.getScope().equals("prototype")){
+                Method[] methods = SUHANCLASSLOADER.loadClass(className).getDeclaredMethods();
+                int k = 0;
+                for(Method method : methods){
+                    if(method.getName().equals("postProcessBeforeInstantiation")){
+                        bean = method.invoke(bean,bd.getClazz(),bd.getClassName());
+                        k++;
+                        break;
+                    }
+                }
+                if(k != 1){
+                    String beanName = bd.getClassName().toString();
+                    //实例化
+                    creatSingletonBean(beanName, bd);
 
-            return theConstructor.newInstance();
+                    //实例化后
+                    if (isRealize(bd, InstantiationAwareBeanPostProcessor.class)) {
+                        try {
+                            ((InstantiationAwareBeanPostProcessor)bean).postProcessAfterInstantiation(bean, beanName);
+                        } catch (Exception e) {
+                            throw new RuntimeException(e);
+                        }
+                    }
+
+                    //实例化后的对beandefinition的操作
+                    if (isRealize(bd, MergedBeanDefinitionPostProcessor.class)) {
+                        applyPostProcessMergedBeanDefinition(bd , bd.getClazz() , beanName);
+                    }
+
+                    //依赖注入
+                    injectingBean(beanName);
+
+                    //初始化前
+                    bean = SINGLETONBEAN_MAP.get(beanName);
+                    if (isRealize(bd, BeanPostProcessor.class)) {
+                        Object processedBean = applyBeanPostProcessorsBeforeInitialization(bean, beanName);
+                        if (processedBean != null) {
+                            bean = processedBean;
+                            SINGLETONBEAN_MAP.put(beanName, bean);
+                        }
+                    }
+
+                    //初始化后
+                    bean = SINGLETONBEAN_MAP.get(beanName);
+                    if(isRealize(bd, BeanPostProcessor.class)) {
+                        Object processedBean = applyBeanPostProcessorsAfterInitialization(bean, beanName);
+                        if (processedBean != null) {
+                            SINGLETONBEAN_MAP.put(beanName, processedBean);
+                        }
+                    }
+                }
+            }
+
+
+            return bean;
         }
         catch (ClassNotFoundException | InstantiationException | IllegalAccessException | InvocationTargetException e) {
             throw new RuntimeException(e);
         }
+
 
 
 
