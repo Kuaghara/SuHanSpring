@@ -16,9 +16,10 @@ import static org.example.spring.SuHanApplication.*;
 import static org.example.spring.create.CreatBeans.creatBean;
 
 public class InjectingBeans {
-    public static void injectingBean(String name) {
+    public static void injectingBean(BeanDefinition bd) {
 
-        if (INJECTIONELEMENT_MAP.containsKey( name)) {
+        String name = bd.getClassName().toString();
+        if (INJECTIONELEMENT_MAP.containsKey( name )) {
             List<AutoElement> autoElements = INJECTIONELEMENT_MAP.get(name);
 
             for (AutoElement autoElement : autoElements) {

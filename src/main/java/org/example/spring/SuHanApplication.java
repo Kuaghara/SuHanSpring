@@ -1,22 +1,15 @@
 package org.example.spring;
 
-import org.example.spring.Annotation.*;
 import org.example.spring.informationEntity.AutoElement;
 import org.example.spring.informationEntity.BeanDefinition;
 
-
-import java.lang.reflect.Constructor;
-import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
-
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 
 import static org.example.spring.create.CreatBeans.creatBean;
 import static org.example.spring.create.Creates.creat;
-
 import static org.example.spring.scan.Scans.scan;
 
 
@@ -24,8 +17,9 @@ public class SuHanApplication {
     Class<?> mainConfig;
     public static Map<String, BeanDefinition> BEANDEFINITION_MAP = new HashMap<>();
     public static Map<String, Object> SINGLETONBEAN_MAP = new HashMap<>();
-    public static ClassLoader SUHANCLASSLOADER =null;
-    public static Map<String , List<AutoElement>> INJECTIONELEMENT_MAP = new HashMap<>();
+    public static ClassLoader SUHANCLASSLOADER = null;
+    public static Map<String, List<AutoElement>> INJECTIONELEMENT_MAP = new HashMap<>();
+    public static List<Class> AOP_LIST = new ArrayList<>();
 
 
     public SuHanApplication(Class<?> clazz) {
@@ -37,63 +31,21 @@ public class SuHanApplication {
     }
 
 
-
-
-
-//    private Object createSingletonBean(BeanDefinition beanDefinition) throws NoSuchMethodException, InvocationTargetException, InstantiationException, IllegalAccessException {
-//        Class<?> clazz = beanDefinition.getClazz();
-//        String scope = beanDefinition.getScope();
-//        Constructor<?> constructors = clazz.getDeclaredConstructor();
-//        Object object = constructors.newInstance();
-//        return autowire(object);
-//    }
-//    private Object autowire(Object object1) throws IllegalAccessException, InvocationTargetException, NoSuchMethodException, InstantiationException {
-//        Class<?> clazz1 = object1.getClass();
-//        Field[] fields = clazz1.getDeclaredFields();
-//        for (Field field : fields) {
-//            if (field.isAnnotationPresent(Autowired.class)) {
-//                Class<?> fieldType = field.getType();
-//                String beanName = null;
-//
-//                for (Map.Entry<String, BeanDefinition> entry : BEANDEFINITION_MAP.entrySet()) {
-//                    if (entry.getValue().getClazz().equals(fieldType)) {
-//                        beanName = entry.getKey();
-//                        break;
-//                    }
-//                }
-//
-//                if (beanName != null) {
-//                    field.setAccessible(true);
-//                    BeanDefinition beanDefinition = BEANDEFINITION_MAP.get(beanName);
-//                    if ("singleton".equals(beanDefinition.getScope())) {
-//                        field.set(object1, SINGLETONBEAN_MAP.get(beanName));
-//                    } else {
-//                        field.set(object1, createSingletonBean(beanDefinition));
-//                    }
-//                }
-//            }
-//        }
-//        return object1;
-//    }
-
-
     public Object getBean(String beanName) {
-        BeanDefinition beanDefinition= BEANDEFINITION_MAP.get(beanName);
-        if(beanDefinition==null){
-            throw new RuntimeException(beanName+"不存在");
-        }
-        else{
-            if(beanDefinition.getScope().equals("singleton")){
+        BeanDefinition beanDefinition = BEANDEFINITION_MAP.get(beanName);
+        if (beanDefinition == null) {
+            throw new RuntimeException(beanName + "不存在");
+        } else {
+            if (beanDefinition.getScope().equals("singleton")) {
                 return SINGLETONBEAN_MAP.get(beanName);
-            }
-            else{
+            } else {
                 return creatBean(beanDefinition);
             }
         }
     }
 
-    public static void setClassLoader(ClassLoader classLoader){
-        SUHANCLASSLOADER=classLoader;
+    public static void setClassLoader(ClassLoader classLoader) {
+        SUHANCLASSLOADER = classLoader;
     }
 
 }

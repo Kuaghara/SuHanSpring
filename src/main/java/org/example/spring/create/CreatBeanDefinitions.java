@@ -5,12 +5,12 @@ import org.example.spring.Annotation.Scope;
 import org.example.spring.informationEntity.BeanDefinition;
 
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 
+import static org.example.spring.SuHanApplication.AOP_LIST;
 import static org.example.spring.SuHanApplication.BEANDEFINITION_MAP;
 
-import static org.example.spring.scan.AnnotationBeanNameGenerator.generateName;
+import static org.example.spring.scan.BeanNameGenerator.generateName;
 
 public class CreatBeanDefinitions {
 
@@ -47,7 +47,11 @@ public class CreatBeanDefinitions {
                     String lazyValue = class2.getDeclaredAnnotation(Lazy.class).value();
                     entry.getValue().setLazy(lazyValue);
                 }
-                //目前就只有这两个注解，就先添加这两个吧
+
+                //再判断是否为执行aop的方法
+                if(class2.isAnnotationPresent(org.example.spring.proxy.annotation.Aspect.class)){
+                    AOP_LIST.add(bd.getClazz());
+                }
             }
             catch (ClassNotFoundException e) {
                 throw new RuntimeException(e);

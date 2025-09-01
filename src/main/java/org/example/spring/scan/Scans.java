@@ -2,6 +2,8 @@ package org.example.spring.scan;
 
 import org.example.spring.Annotation.ComponentScan;
 import org.example.spring.Annotation.Configuration;
+import org.example.spring.beanPostProcessor.ProxyBeanPostProcessor;
+import org.example.spring.informationEntity.BeanDefinition;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -37,6 +39,10 @@ public class Scans {
 
             //再对beanDefinitionMap进行扫描，查找出所有包含@Autowired的属性或者方法，为将来的属性注入做准备
             autoWiredScan(BEANDEFINITION_MAP);
+
+            for(BeanDefinition bd : BEANDEFINITION_MAP.values()){
+                ProxyBeanPostProcessor.registerAdvisor(bd);
+            }
 
 
         }

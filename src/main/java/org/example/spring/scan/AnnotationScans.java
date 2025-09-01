@@ -48,60 +48,19 @@ public class AnnotationScans {
                 try {
                     BeanDefinition beanDefinition = new BeanDefinition();
 
-                    setbeanDefinition(class1, beanDefinition);
-
+                    setBeanDefinition(class1, beanDefinition);
 
                     generateBeanDefinition.add(beanDefinition);
                 } catch (Exception e) {
                     throw new RuntimeException("发现了两个重复的bean：" + class1);
                 }
-                //此处为原来的逻辑，生成beanDefinition对象并将其放在map中，生成单例bean并放在单例池中
-                //更新后将步骤拆分细化，此处先进行路径的注释扫描
-                //相关细分代码编写完毕后便会将其删除
 
-
-//                BeanDefinition beanDefinition = new BeanDefinition();
-//                //保存类名
-//
-//                Component component = classLoader.getDeclaredAnnotation(Component.class);
-//                //为后方单例模式名字创建注解对象
-//
-//                String beanName;
-//                if(component.value().equals("")){
-//                    beanName = classLoader.getSimpleName();
-//                }
-//                else {
-//                    beanName = component.value();
-//                }
-//                beanDefinition.setClassName(beanName);
-//
-//                if (classLoader.isAnnotationPresent(Scope.class)) {
-//                    Scope scope = classLoader.getDeclaredAnnotation(Scope.class);
-//                    String scopeValue = scope.value();
-//
-//                    //判断为原型模式，将原型保存
-//                    if (scopeValue.equals("prototype")) {
-//                        beanDefinition.setClazz(classLoader);
-//                        beanDefinition.setScope("prototype");
-//
-//                    } else {
-//                        beanDefinition.setClazz(classLoader);
-//                        singletonbeanMap.put(beanName,createSingletonBean(beanDefinition));
-//
-//                    }
-//                } else {
-//                    beanDefinition.setClazz(classLoader);
-//                    singletonbeanMap.put(beanName, createSingletonBean(beanDefinition));
-//
-//                }
-//
-//                beandefinitionMap.put(beanName, beanDefinition);
-//
             }
         }
+
     }
 
-    public static void setbeanDefinition(Class<?> class1, BeanDefinition beanDefinition) {
+    public static void setBeanDefinition(Class<?> class1, BeanDefinition beanDefinition) {
         //查找Scope注解
         if(class1.isAnnotationPresent(Scope.class)){
             Scope declaredAnnotation = class1.getDeclaredAnnotation(Scope.class);

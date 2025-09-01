@@ -6,9 +6,11 @@ import org.example.spring.Annotation.Component;
 import org.example.spring.Annotation.Scope;
 import org.example.spring.beanPostProcessor.InstantiationAwareBeanPostProcessor;
 
+import java.lang.reflect.InvocationHandler;
+import java.lang.reflect.Method;
+
 
 @Component
-@Scope("prototype")
 public class UserService implements InstantiationAwareBeanPostProcessor {
     String name;
 
@@ -38,4 +40,5 @@ public class UserService implements InstantiationAwareBeanPostProcessor {
         System.out.println("实例化之前");
         return new UserService();
     }
+
 }

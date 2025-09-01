@@ -1,10 +1,10 @@
 package org.example.spring.informationEntity;
 
 public class BeanDefinition {
-    private Object className;
-    private Class<?> clazz;
-    private String scope;
-    private String lazy;
+    private Object className;//类名
+    private Class<?> clazz;//获取实例对象
+    private String scope;//作用域
+    private String lazy;//懒加载
 
     public Class<?> getClazz() {
         return clazz;
