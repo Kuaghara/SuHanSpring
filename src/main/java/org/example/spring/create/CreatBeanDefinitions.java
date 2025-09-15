@@ -3,26 +3,29 @@ package org.example.spring.create;
 import org.example.spring.Annotation.Lazy;
 import org.example.spring.Annotation.Scope;
 import org.example.spring.informationEntity.BeanDefinition;
+import org.example.spring.proxy.annotation.Aspect;
 
 import java.util.List;
 import java.util.Map;
 
-import static org.example.spring.SuHanApplication.AOP_LIST;
-import static org.example.spring.SuHanApplication.BEANDEFINITION_MAP;
 
+
+
+import static org.example.spring.context.BeanFactory.DefaultListableBeanFactory.AOP_LIST;
+import static org.example.spring.context.BeanFactory.DefaultListableBeanFactory.beanDefinitionMap;
 import static org.example.spring.scan.BeanNameGenerator.generateName;
-
+@Deprecated
 public class CreatBeanDefinitions {
 
     public static void creatBeanDefinitionMap(Class<?> clazz, List<Object> generateBeanDefinition) {
         ClassLoader SuhanClassLoader = clazz.getClassLoader();
         for(Object beanDefinition : generateBeanDefinition){
-            String beanName = generateName(beanDefinition);
-            BEANDEFINITION_MAP.computeIfAbsent(beanName, k -> (BeanDefinition) beanDefinition);
+            String beanName = beanDefinition.getClass().getSimpleName();
+            beanDefinitionMap.computeIfAbsent(beanName, k -> (BeanDefinition) beanDefinition);
         }
 
         //接下来配置每个definition
-        for (Map.Entry<String,BeanDefinition> entry : BEANDEFINITION_MAP.entrySet()){
+        for (Map.Entry<String,BeanDefinition> entry : beanDefinitionMap.entrySet()){
 
             //先获取一个beanDefinition对象
             BeanDefinition bd = entry.getValue();
@@ -30,7 +33,6 @@ public class CreatBeanDefinitions {
 
                 //然后获取一个类的class对象
                 Class<?> class2 = SuhanClassLoader.loadClass(bd.getClassName().toString().substring(6));
-
 
                 //重新修改clazz及name属性
                 bd.setClazz(class2);
@@ -49,7 +51,7 @@ public class CreatBeanDefinitions {
                 }
 
                 //再判断是否为执行aop的方法
-                if(class2.isAnnotationPresent(org.example.spring.proxy.annotation.Aspect.class)){
+                if(class2.isAnnotationPresent(Aspect.class)){
                     AOP_LIST.add(bd.getClazz());
                 }
             }

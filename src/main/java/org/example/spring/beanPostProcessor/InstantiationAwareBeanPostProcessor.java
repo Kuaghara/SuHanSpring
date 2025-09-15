@@ -1,9 +1,9 @@
 package org.example.spring.beanPostProcessor;
 
-public interface InstantiationAwareBeanPostProcessor {
+public interface InstantiationAwareBeanPostProcessor extends BeanPostProcessor{
 
     // 实例化之前
-    default Object postProcessBeforeInstantiation(Class<?> beanClass, String beanName) throws  Exception{
+    default Object postProcessBeforeInstantiation(Class<?> beanClass, String beanName){
         return null;
     }
 

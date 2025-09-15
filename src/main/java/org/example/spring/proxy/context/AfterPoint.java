@@ -5,8 +5,6 @@ import org.example.spring.proxy.annotation.Before;
 
 import java.lang.reflect.Method;
 
-import static org.example.spring.SuHanApplication.SUHANCLASSLOADER;
-
 public class AfterPoint implements PointParser{
 
     @Override

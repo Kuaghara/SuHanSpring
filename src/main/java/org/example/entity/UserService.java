@@ -11,7 +11,7 @@ import java.lang.reflect.Method;
 
 
 @Component
-public class UserService implements InstantiationAwareBeanPostProcessor {
+public class UserService  {
     String name;
 
     @Autowired
@@ -35,10 +35,6 @@ public class UserService implements InstantiationAwareBeanPostProcessor {
         System.out.println("hello world");
     }
 
-    @Override
-    public Object postProcessBeforeInstantiation(Class<?> beanClass, String beanName) throws Exception {
-        System.out.println("实例化之前");
-        return new UserService();
-    }
+
 
 }

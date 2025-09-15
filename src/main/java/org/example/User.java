@@ -1,10 +1,18 @@
 package org.example;
 
+import org.example.entity.CircularDependency_Test;
+import org.example.entity.OldUserService;
+import org.example.entity.UserService;
+import org.example.spring.Annotation.Autowired;
+
 public class User {
     private String name;
     private int age;
-    public User() {
-    }
+
+    @Autowired
+    private CircularDependency_Test circularDependency_test;
+
+    public User() {}
 
     public String getName() {
         return name;
@@ -20,5 +28,9 @@ public class User {
 
     public void setAge(int age) {
         this.age = age;
+    }
+
+    public void test() {
+        System.out.println("test");
     }
 }

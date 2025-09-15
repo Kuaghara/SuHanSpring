@@ -2,6 +2,7 @@ package org.example.spring.informationEntity;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
+import java.util.List;
 
 public class AutowiredConstructorElement implements AutoElement {
     Constructor constructor;
@@ -31,5 +32,12 @@ public class AutowiredConstructorElement implements AutoElement {
 
     public void setConstructor(Constructor constructor) {
         this.constructor = constructor;
+    }
+
+    public AutowiredConstructorElement clone() {
+        AutowiredConstructorElement element = new AutowiredConstructorElement();
+        element.setConstructor(constructor);
+        element.setRequired(required);
+        return element;
     }
 }
