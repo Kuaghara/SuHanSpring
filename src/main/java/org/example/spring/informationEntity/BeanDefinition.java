@@ -1,14 +1,21 @@
 package org.example.spring.informationEntity;
 
+import java.util.List;
+import java.util.Map;
+
 public interface BeanDefinition {
 
-    public String getLazy() ;
-    public void setLazy(String lazy) ;
-    public Class<?> getClazz();
-    public void setClazz(Class<?> clazz);
-    public Object getClassName();
-    public void setClassName(Object className) ;
-    public String getScope() ;
-    public void setScope(String scope) ;
-    public void setBeanDefinition(Class<?> clazz);
+     String getLazy() ;
+     void setLazy(String lazy) ;
+     Class<?> getClazz();
+     void setClazz(Class<?> clazz);
+     Object getClassName();
+     void setClassName(Object className) ;
+     String getScope() ;
+     void setScope(String scope) ;
+     void setBeanDefinition(Class<?> clazz);
+     void addAutoElement(AutoElement autoElement);
+     void addAllAutoElement(List<AutoElement> autoElement);
+     Map<AutoElement,Boolean> getAutoElementMap() ;
+
 }

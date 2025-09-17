@@ -20,7 +20,7 @@ import static org.example.spring.context.BeanFactory.DefaultListableBeanFactory.
 //处理自动注入的beanPostProcessor
 public class AutowiredAnnotationBeanProcessor implements SmartInstantiationAwareBeanPostProcessor,SmartInitializationAwareBeanPostProcessor {
     Map<String, List<AutoElement>> injectionElement_MAP = new HashMap<>();
-    private Map<Object, Class<?>> creatingObject = new HashMap<>();
+    private Map<Object, Class<?>> creatingObject = new HashMap<>();//目前还没啥用
 
     public BeanDefinition addBeanPostProcessor() {
         BeanDefinition beanDefinition = new AnnotatedGenericBeanDefinition();
@@ -102,12 +102,13 @@ public class AutowiredAnnotationBeanProcessor implements SmartInstantiationAware
                 }
             }
             if (!currElements.isEmpty()) {
+                entry.getValue().addAllAutoElement(currElements);
                 injectionElement_MAP.put(entry.getKey(), currElements);
             }
         }
     }
 
-    //此处为旧依赖注入逻辑，弃用，都实例化了竟然还传入beanDefinition，不合理
+    //此处为旧依赖注入逻辑，弃用，都实例化了竟然还传入beanDefinition，不合理,1.0版本
 //    @Deprecated
 //    public void doAutowiredAnnotationInjection(BeanDefinition bd) throws Exception {
 //        //此处的bd为当前正在注入的beanDefinition
@@ -178,14 +179,74 @@ public class AutowiredAnnotationBeanProcessor implements SmartInstantiationAware
 //        }
 //    }
 
+//    此为2.0版本
+//    public Object doAutowiredAnnotationInjection(Object target)  {
+//        String targetName = target.getClass().getSimpleName();   //0的类名
+//        BeanDefinition tbd = beanDefinitionMap.get(targetName);//0的beanDefinition
+//        List<AutoElement> autoElements = tbd.getAllAutoElement();
+//        //List<AutoElement> autoElements = injectionElement_MAP.get(targetName); //0们
+//
+//        if(autoElements != null) {
+//            for (AutoElement autoElement : autoElements) { //遍历每一个0
+//                //先把0解包出来
+//                Field field = autoElement.getField(); //把0拆出来
+//                field.setAccessible(true);
+//                String fieldName = field.getType().getSimpleName(); //0的名字
+//                BeanPostProcessor proxyProcessor = new ProxyBeanPostProcessor();//后边循环依赖用的着
+//                Object oneBean = getEarlyBean(fieldName) != null ? getEarlyBean(fieldName) : getSingletonBean(fieldName); //把1从单例池中掏出来
+//
+//                //单例在1，2层都找不到，则进入依赖循环
+//                //多态在1，2层都找不到，则直接创建一个然后aop回去
+//                if(oneBean != null){
+//                    try {
+//                        field.set(target, oneBean);
+//                        tbd.setIsAutowired( true );//
+//                        return target;
+//                    }catch (IllegalAccessException e){
+//                        throw new RuntimeException(e);
+//                    }
+//                }
+//                else if(beanDefinitionMap.containsKey(fieldName)){
+//                    BeanDefinition bd = beanDefinitionMap.get(fieldName);
+//                    if(bd.getScope().equals("prototype")){
+//                        try {
+//                            oneBean = bd.getClazz().getConstructor().newInstance();
+//                            field.set(target, proxyProcessor.postProcessAfterInitialization(oneBean, fieldName));
+//                            return target;
+//                        } catch (InstantiationException | IllegalAccessException | InvocationTargetException |
+//                                 NoSuchMethodException e) {
+//                            throw new RuntimeException(e);
+//                        }
+//                    }
+//                    else {
+//                        creatingObject.put(target, bd.getClazz());
+//                        ObjectFactory<Object> factory = new ObjectFactory<Object>() {
+//                            @Override
+//                            public Object getObject() throws Exception {
+//                                //我应该获取一个需要被注入的实例，无需依赖注入，并且如果有aop我应该去实现aop。。。
+//                                Object bean = instantiationBean(bd);//1的实例
+//                                return proxyProcessor.postProcessAfterInitialization(bean, fieldName);
+//                            }
+//                        };
+//                        CircularDependency.addFactory(fieldName, factory);
+//                    }
+//                }
+//            }
+//        }
+//        return target;
+//    }
+
+
     public Object doAutowiredAnnotationInjection(Object target)  {
         String targetName = target.getClass().getSimpleName();   //0的类名
-        List<AutoElement> autoElements = injectionElement_MAP.get(targetName); //0们
+        BeanDefinition tbd = beanDefinitionMap.get(targetName);//0的beanDefinition
+        Map< AutoElement , Boolean > autoElementMap = tbd.getAutoElementMap(); //0们以及是否被注入
 
-        if(autoElements != null) {
-            for (AutoElement autoElement : autoElements) { //遍历每一个0
+
+        if(autoElementMap != null) {
+            for ( Map.Entry<AutoElement, Boolean> autoElement : autoElementMap.entrySet()) { //遍历每一个0
                 //先把0解包出来
-                Field field = autoElement.getField(); //把0拆出来
+                Field field = autoElement.getKey().getField(); //把0拆出来
                 field.setAccessible(true);
                 String fieldName = field.getType().getSimpleName(); //0的名字
                 BeanPostProcessor proxyProcessor = new ProxyBeanPostProcessor();//后边循环依赖用的着
@@ -196,7 +257,7 @@ public class AutowiredAnnotationBeanProcessor implements SmartInstantiationAware
                 if(oneBean != null){
                     try {
                         field.set(target, oneBean);
-                        return target;
+                        autoElement.setValue( true );
                     }catch (IllegalAccessException e){
                         throw new RuntimeException(e);
                     }
@@ -207,7 +268,7 @@ public class AutowiredAnnotationBeanProcessor implements SmartInstantiationAware
                         try {
                             oneBean = bd.getClazz().getConstructor().newInstance();
                             field.set(target, proxyProcessor.postProcessAfterInitialization(oneBean, fieldName));
-                            return target;
+                            autoElement.setValue( true );
                         } catch (InstantiationException | IllegalAccessException | InvocationTargetException |
                                  NoSuchMethodException e) {
                             throw new RuntimeException(e);

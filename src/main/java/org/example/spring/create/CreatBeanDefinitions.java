@@ -16,7 +16,6 @@ import static org.example.spring.context.BeanFactory.DefaultListableBeanFactory.
 import static org.example.spring.scan.BeanNameGenerator.generateName;
 @Deprecated
 public class CreatBeanDefinitions {
-
     public static void creatBeanDefinitionMap(Class<?> clazz, List<Object> generateBeanDefinition) {
         ClassLoader SuhanClassLoader = clazz.getClassLoader();
         for(Object beanDefinition : generateBeanDefinition){

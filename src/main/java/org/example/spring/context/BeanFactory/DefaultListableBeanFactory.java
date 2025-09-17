@@ -36,6 +36,7 @@ public class DefaultListableBeanFactory implements ConfigurableListableBeanFacto
     //我本打算放在初始化方法的无参调用上的
     public void refresh() {
         beanPostProcessorReader(beanDefinitionMap);
+
         /*---------此处已视为beanDefinition_Map生成完毕，并没有考虑bean拥有父类------------- */
         //此处的想法是进行@Autowired注解的扫描和@Aspect注解的扫描
         applySmartInstantiationBeanPostProcessor(true, null);
@@ -85,6 +86,10 @@ public class DefaultListableBeanFactory implements ConfigurableListableBeanFacto
 
     public void addBeanPostProcessor(BeanPostProcessor beanPostProcessor) {
         beanPostProcessors.add(beanPostProcessor);
+    }
+
+    public void addAllBeanPostProcessor(List<BeanPostProcessor> beanPostProcessors) {
+        this.beanPostProcessors.addAll(beanPostProcessors);
     }
 
     //从beanDefinition_Map中把每个beanPostProcessor挑出来的
@@ -148,12 +153,11 @@ public class DefaultListableBeanFactory implements ConfigurableListableBeanFacto
         if(!beanDefinitionMap.containsKey(beanName)){
             throw  new RuntimeException(beanName+"不存在");
         }
-        //User不应该能在一层缓存中查找到，出现问题
         Object bean = singletonObjects.get(beanName);
         if(bean == null ){
             bean = earlySingletonObjects.get(beanName);
             BeanDefinition bd = beanDefinitionMap.get(beanName);
-            if( bean == null&&bd.getScope().equals("singleton")){
+            if( bean != null&&bd.getScope().equals("singleton")){
                 CircularDependency circularDependency = new CircularDependency();
                 return circularDependency.doGetBean(beanName);
             }

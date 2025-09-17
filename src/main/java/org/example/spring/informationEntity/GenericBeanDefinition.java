@@ -4,6 +4,11 @@ import org.example.spring.Annotation.Lazy;
 import org.example.spring.Annotation.Scope;
 import org.example.spring.proxy.annotation.Aspect;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import static org.example.spring.context.BeanFactory.DefaultListableBeanFactory.AOP_LIST;
 
 public class GenericBeanDefinition implements BeanDefinition{
@@ -11,6 +16,7 @@ public class GenericBeanDefinition implements BeanDefinition{
     private Class<?> clazz;//bean的Class反射类
     private String scope;//bean的作用域
     private String lazy;//bean的懒加载
+    private Map<AutoElement,Boolean> autoElementMap = new HashMap<>();//拿来存放字段以及是否被注入
     //其余的先不实现
 
 
@@ -37,6 +43,22 @@ public class GenericBeanDefinition implements BeanDefinition{
         setClazz(clazz);
     }
 
+    @Override
+    public void addAutoElement(AutoElement autoElement) {
+        autoElementMap.put(autoElement,false);
+    }
+
+    @Override
+    public void addAllAutoElement(List<AutoElement> autoElement) {
+        for (AutoElement autoElement1 : autoElement) {
+            autoElementMap.put(autoElement1,false);
+        }
+    }
+
+    @Override
+    public Map<AutoElement,Boolean> getAutoElementMap(){
+        return autoElementMap;
+    }
 
     @Override
     public Class<?> getClazz() {

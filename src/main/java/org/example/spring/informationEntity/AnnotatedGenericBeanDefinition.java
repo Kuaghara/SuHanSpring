@@ -6,7 +6,9 @@ import org.example.spring.proxy.annotation.Aspect;
 
 import java.lang.annotation.Annotation;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import static org.example.spring.context.BeanFactory.DefaultListableBeanFactory.AOP_LIST;
 
@@ -16,6 +18,7 @@ public class AnnotatedGenericBeanDefinition implements BeanDefinition{
     private String scope;
     private String lazy;
     private List<Annotation> annotations = new ArrayList<>();
+    private Map<AutoElement,Boolean> autoElementMap = new HashMap<>();//拿来存放字段以及是否被注入
 
 
     @Override
@@ -46,6 +49,24 @@ public class AnnotatedGenericBeanDefinition implements BeanDefinition{
         //特别实现
         addAllAnnotation(List.of(clazz.getAnnotations()));
     }
+
+    @Override
+    public void addAutoElement(AutoElement autoElement) {
+        autoElementMap.put(autoElement,false);
+    }
+
+    @Override
+    public void addAllAutoElement(List<AutoElement> autoElement) {
+        for (AutoElement autoElement1 : autoElement) {
+            autoElementMap.put(autoElement1,false);
+        }
+    }
+
+    @Override
+    public Map<AutoElement, Boolean> getAutoElementMap() {
+        return autoElementMap ;
+    }
+
 
     @Override
     public String getLazy() {

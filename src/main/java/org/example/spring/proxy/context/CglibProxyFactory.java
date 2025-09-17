@@ -22,9 +22,7 @@ public class CglibProxyFactory implements ProxyFactory, MethodInterceptor {
     }
 
     @Override
-    public void addAdvisor(Advisor advisor) {
-
-    }
+    public void addAdvisor(Advisor advisor) {}
 
     @Override
     //第一个参数：动态生成的代理实例

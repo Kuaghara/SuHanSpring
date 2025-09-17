@@ -1,5 +1,7 @@
 package org.example.spring.context;
 
+import org.example.spring.Annotation.Import;
+import org.example.spring.beanPostProcessor.BeanPostProcessor;
 import org.example.spring.context.BeanFactory.BeanFactory;
 import org.example.spring.context.BeanFactory.DefaultListableBeanFactory;
 import org.example.spring.context.Reader.AnnotationBeanDefinitionReader;
@@ -7,6 +9,8 @@ import org.example.spring.context.Reader.ClassPathBeanDefinitionReader;
 import org.example.spring.informationEntity.BeanDefinition;
 import org.example.spring.context.Reader.BeanDefinitionReader;
 
+import java.lang.annotation.Annotation;
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -32,6 +36,7 @@ public class AnnotationApplicationContext extends DefaultListableBeanFactory imp
         generatedDefinitionList.addAll(annotationReader.loadBeanDefinitions(mainConfigClass));
         generatedDefinitionList.addAll(classReader.loadBeanDefinitions(mainConfigClass));
         doCreatBeanDefinitionMap(generatedDefinitionList);
+        explainConfigAnnotation(mainConfigClass);//查找配置类中的@Import注解
         super.refresh();//此处回调beanFactory的refresh方法
     }
 
@@ -39,6 +44,31 @@ public class AnnotationApplicationContext extends DefaultListableBeanFactory imp
         for(BeanDefinition bd : generatedDefinitionList){
             registerBeanDefinition(bd.getClassName().toString(),bd);//此处回调工厂方法把beanDefinition注册进去
         }
+    }
+
+    //用来查找@import注解
+    private void explainConfigAnnotation(Class<?> configClass){
+            List<Annotation> annotations = List.of(configClass.getAnnotations());
+            Import importAnnotation = configClass.getAnnotation(Import.class);
+            if (annotations.isEmpty()) {
+                return;
+            }
+            if (importAnnotation == null) {
+                for(Annotation annotation : annotations){
+                    explainConfigAnnotation(annotation.getClass());
+                }
+            }
+            else {
+                Class< ? > [] importBeanPostProcessors = importAnnotation.value();
+                for(Class clazz : importBeanPostProcessors){
+                    try {
+                        addBeanPostProcessor((BeanPostProcessor) clazz.getConstructor().newInstance());
+                    } catch (InstantiationException | IllegalAccessException | InvocationTargetException |
+                             NoSuchMethodException e) {
+                        throw new RuntimeException(e);
+                    }
+                }
+            }
     }
 
     @Override

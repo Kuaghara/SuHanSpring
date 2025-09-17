@@ -7,6 +7,7 @@ import org.example.spring.beanAware.BeanNameAware;
 import org.example.spring.beanAware.BeanScopeAware;
 import org.example.spring.beanPostProcessor.*;
 import org.example.spring.create.CircularDependency;
+import org.example.spring.informationEntity.AutoElement;
 import org.example.spring.informationEntity.BeanDefinition;
 
 import java.lang.reflect.Constructor;
@@ -88,11 +89,27 @@ public class AbstractDefaultListableBeanFactory implements AbstractFactory {
                 bean = createBean(entry.getValue());
             }
            bean = applyAfterBeanPostProcessor(beanPostProcessors, bean);
-            factory.registerSingleton(entry.getKey(), bean);
+            if(isAutoWiredInject(entry.getValue())) {
+                factory.registerSingleton(entry.getKey(), bean);
+            }
+            else {
+                putEarlyBean(entry.getKey(), bean);
+            }
         }
     }
-    int index = 0;
 
+    //判断有没有完全实现依赖注入
+    private Boolean isAutoWiredInject(BeanDefinition bd){
+        Map<AutoElement , Boolean> autoElementMap = bd.getAutoElementMap();
+        for(Boolean ok : autoElementMap.values()){
+            if (!ok){
+                return false;
+            }
+        }
+        return true;
+    }
+
+    int index = 0;
     //zhengzaixie
     private Object doCreatSingletonBean(BeanDefinition beanDefinition) throws Exception {
         Object bean = applyBeforeInstantiationAwareBeanPostProcessor(beanPostProcessors, beanDefinition);
@@ -191,7 +208,9 @@ public class AbstractDefaultListableBeanFactory implements AbstractFactory {
     private Object applyAfterBeanPostProcessor(List<BeanPostProcessor> beanPostProcessors, Object bean){
         for(BeanPostProcessor beanPostProcessor : beanPostProcessors){
             Object temp = beanPostProcessor.postProcessAfterInitialization(bean, bean.getClass().getSimpleName());
-            return Objects.requireNonNullElse(temp, bean);
+            if(temp != null) {
+                return temp;
+            }
         }
         return bean;
     }
