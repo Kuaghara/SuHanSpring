@@ -10,8 +10,8 @@ public class AsyncPoint implements PointParser {
     public Advisor getAdvisor(Method method, Object Aspect) {
         Method[] methods = Aspect.getClass().getDeclaredMethods();
         Method asyncMethod = null;
-        for (Method m : methods){
-            if(m.isAnnotationPresent(Async.class)){
+        for (Method m : methods) {
+            if (m.isAnnotationPresent(Async.class)) {
                 asyncMethod = m;
             }
         }
@@ -20,18 +20,21 @@ public class AsyncPoint implements PointParser {
         String pathClassName = path.substring(0, path.lastIndexOf("."));
         String pathMethodName = path.substring(path.lastIndexOf(".") + 1, path.lastIndexOf("("));
 
+        Method finalAsyncMethod = asyncMethod;
         return new Advisor() {
 
+            //9.20：
+            //此处编写并未debug,不能确保能运行
             @Override
             public Advice getAdvice() {
-                return methodInvocation->{
-                   return new Thread(() -> {
+                return methodInvocation -> {
+                    return new Thread(() -> {
                         try {
-                            asyncMethod.invoke(Aspect);
+                            finalAsyncMethod.invoke(Aspect);
                         } catch (Exception e) {
                             e.printStackTrace();
                         }
-                    }).start();
+                    });
                 };
             }
 

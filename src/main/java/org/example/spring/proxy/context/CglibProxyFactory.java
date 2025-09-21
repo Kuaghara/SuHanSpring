@@ -8,6 +8,7 @@ import java.lang.reflect.Method;
 
 public class CglibProxyFactory implements ProxyFactory, MethodInterceptor {
     private Object target;
+
     public CglibProxyFactory(Object target) {
         this.target = target;
     }
@@ -22,7 +23,8 @@ public class CglibProxyFactory implements ProxyFactory, MethodInterceptor {
     }
 
     @Override
-    public void addAdvisor(Advisor advisor) {}
+    public void addAdvisor(Advisor advisor) {
+    }
 
     @Override
     //第一个参数：动态生成的代理实例

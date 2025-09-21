@@ -1,7 +1,7 @@
 package org.example.entity;
 
 
-import org.example.spring.Annotation.Component;
+import org.example.spring.annotation.Component;
 
 @Component
 public class OldUserService {

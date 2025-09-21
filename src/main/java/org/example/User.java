@@ -1,9 +1,7 @@
 package org.example;
 
 import org.example.entity.CircularDependency_Test;
-import org.example.entity.OldUserService;
-import org.example.entity.UserService;
-import org.example.spring.Annotation.Autowired;
+import org.example.spring.annotation.Autowired;
 
 public class User {
     private String name;
@@ -12,7 +10,8 @@ public class User {
     @Autowired
     private CircularDependency_Test circularDependency_test;
 
-    public User() {}
+    public User() {
+    }
 
     public String getName() {
         return name;

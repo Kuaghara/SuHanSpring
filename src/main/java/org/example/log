@@ -1,0 +1,24 @@
+这就是个日志，从9/20号开始记录
+
+9.20:
+    今天将代码解耦，配置类解析什么的先往后放放
+    1.将DefaultListableBeanFactory中的Aop_List移除，新增beanDefinition中的aspect布尔值字段，记录该类是否被
+    @Aspect注解
+    2.删除DefaultListableBeanFactory中删除beanPostProcessor的beanDefinition的相关操作
+    3.将AbstractDefaultListableBeanFactory中对公开静态常量的所有操作更改为对registry的的操作，已解耦
+    4.删除了部分AbstractDefaultListableBeanFactory中爆红的废弃方法
+    5.临时架空ClassPathBeanDefinitionReader类，之后重写
+    6.重构AutowiredAnnotationBeanProcessor，将其中对于公开静态常量的所有操作更改为对registry的操作，构造时须传入
+    DefaultListableBeanFactory作为相关操作的registry
+    7.重构ProxyBeanPostProcessor，干了啥同上,并对proxy内的代码进行了检查
+    8.删除Cyclic_dependence类，并将其逻辑移植到DefaultListableBeanFactory中
+    9.开始跑，并一点点地修改bug
+    10.出现新问题，推断构造方法时若有需要进行依赖注入的bean时又可能出现循环依赖
+    11.问ai耦合度还是高，继续减
+
+9.21:
+    先继续解耦吧，解耦完再改改昨天的bug
+    1.将ProxyBeanPostProcessor和AutowiredAnnotationBeanProcessor的register继续细分，进一步解耦
+    2.为beanDefinition新添Instantiated属性及其方法，作用是用于判断是否完成实例化，进入循环依赖相关环节
+    3.有关构造方法的循环依赖已解决？同时对第二条进行删除，更改为AutoElement的相关操作
+    4.bug怎么循环依赖了，啊啊啊啊啊啊啊啊啊

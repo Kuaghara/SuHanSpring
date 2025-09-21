@@ -1,14 +1,6 @@
 package org.example.spring.proxy.context;
 
-import org.example.spring.proxy.annotation.After;
-import org.example.spring.proxy.annotation.Before;
-
-import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 import static org.example.spring.proxy.context.AnnotationResolver.advisorList;
 
@@ -16,7 +8,7 @@ public class CglibMethodInvocation implements MethodInvocation {
     private Object target;//此为原对象
     private Method method;//此为原方法
     private Object[] arguments;//此为原方法的参数
-    private  int index = 0;
+    private int index = 0;
 
 
     public CglibMethodInvocation(Object target, Method method, Object[] arguments) {
@@ -43,21 +35,25 @@ public class CglibMethodInvocation implements MethodInvocation {
     @Override
     public Object proceed() {
         try {
-           return this.invoke( this);
+            return this.invoke(this);
         } catch (Throwable e) {
             throw new RuntimeException(e);
         }
     }
 
     @Override
-    public Object getTarget(){return target;}
+    public Object getTarget() {
+        return target;
+    }
 
-    public Integer getIndex() {return index++;}
+    public Integer getIndex() {
+        return index++;
+    }
 
 
     public Object invoke(CglibMethodInvocation invocation) throws Throwable {
-       int index = getIndex();
-        if (index== advisorList.size()) {
+        int index = getIndex();
+        if (index == advisorList.size()) {
             return invocation.invoke();
         }
         Advisor advisor = advisorList.get(index);

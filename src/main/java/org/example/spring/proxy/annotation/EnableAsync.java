@@ -1,7 +1,7 @@
 package org.example.spring.proxy.annotation;
 
 
-import org.example.spring.Annotation.Import;
+import org.example.spring.annotation.Import;
 import org.example.spring.beanPostProcessor.AsyncBeanProcessor;
 
 import java.lang.annotation.ElementType;

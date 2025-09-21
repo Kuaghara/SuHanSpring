@@ -1,61 +1,58 @@
 package org.example.spring.informationEntity;
 
-import org.example.spring.Annotation.Lazy;
-import org.example.spring.Annotation.Scope;
+import org.example.spring.annotation.Lazy;
+import org.example.spring.annotation.Scope;
 import org.example.spring.proxy.annotation.Aspect;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static org.example.spring.context.BeanFactory.DefaultListableBeanFactory.AOP_LIST;
 
-public class ScannedGenericBeanDefinition implements BeanDefinition{
-    private String scope;
-    private String lazy;
+public class ScannedGenericBeanDefinition implements BeanDefinition {
+    private String scope = "singleton";
+    private boolean lazy = false;
     private Class<?> clazz;
-    private Object className;//在扫描完后名字存储的并不是名字
+    private String className;//在扫描完后名字存储的并不是名字
     private String path;
-    private Map<AutoElement,Boolean> autoElementMap = new HashMap<>();//拿来存放字段以及是否被注入
+    private Map<AutoElement, Boolean> autoElementMap = new HashMap<>();//拿来存放字段以及是否被注入
+    private boolean aspect = false;
 
     @Override
     public void setBeanDefinition(Class<?> clazz) {
         //查找Scope注解
-        if(clazz.isAnnotationPresent(Scope.class)){
+        if (clazz.isAnnotationPresent(Scope.class)) {
             Scope declaredAnnotation = clazz.getDeclaredAnnotation(Scope.class);
             setScope(declaredAnnotation.value());
         }
-        else setScope("singleton");
 
         //查找Lazy注解
-        if(clazz.isAnnotationPresent(Lazy.class)){
+        if (clazz.isAnnotationPresent(Lazy.class)) {
             Lazy declaredAnnotation = clazz.getDeclaredAnnotation(Lazy.class);
             setLazy(declaredAnnotation.value());
         }
-        else setLazy("false");
 
         //查找@Aspect注解
-        if(clazz.isAnnotationPresent(Aspect.class)){
-            AOP_LIST.add(clazz);
+        if (clazz.isAnnotationPresent(Aspect.class)) {
+            setAspect( true );
         }
 
         setClassName(clazz.getSimpleName());
         setClazz(clazz);
 
         //特别实现
-        setPath(clazz.getPackage().getName()+"."+clazz.getSimpleName());
+        setPath(clazz.getPackage().getName() + "." + clazz.getSimpleName());
     }
 
     @Override
     public void addAutoElement(AutoElement autoElement) {
-        autoElementMap.put(autoElement,false);
+        autoElementMap.put(autoElement, false);
     }
 
     @Override
     public void addAllAutoElement(List<AutoElement> autoElement) {
         for (AutoElement autoElement1 : autoElement) {
-            autoElementMap.put(autoElement1,false);
+            autoElementMap.put(autoElement1, false);
         }
     }
 
@@ -76,12 +73,12 @@ public class ScannedGenericBeanDefinition implements BeanDefinition{
     }
 
     @Override
-    public String getLazy() {
+    public boolean getLazy() {
         return lazy;
     }
 
     @Override
-    public void setLazy(String lazy) {
+    public void setLazy(boolean lazy) {
         this.lazy = lazy;
     }
 
@@ -96,12 +93,12 @@ public class ScannedGenericBeanDefinition implements BeanDefinition{
     }
 
     @Override
-    public Object getClassName() {
+    public String getClassName() {
         return className;
     }
 
     @Override
-    public void setClassName(Object className) {
+    public void setClassName(String className) {
         this.className = className;
     }
 
@@ -112,4 +109,15 @@ public class ScannedGenericBeanDefinition implements BeanDefinition{
     public void setPath(String path) {
         this.path = path;
     }
+
+    @Override
+    public void setAspect(Boolean Aspect) {
+        this.aspect = Aspect;
+    }
+
+    @Override
+    public boolean getAspect() {
+        return aspect;
+    }
+
 }

@@ -1,9 +1,8 @@
 package org.example.spring.informationEntity;
 
-import java.io.File;
 import java.lang.reflect.Field;
 
-public class AutowiredFieldElement implements AutoElement{
+public class AutowiredFieldElement implements AutoElement {
     Field field;
     boolean required;
 

@@ -5,17 +5,35 @@ import java.util.Map;
 
 public interface BeanDefinition {
 
-     String getLazy() ;
-     void setLazy(String lazy) ;
-     Class<?> getClazz();
-     void setClazz(Class<?> clazz);
-     Object getClassName();
-     void setClassName(Object className) ;
-     String getScope() ;
-     void setScope(String scope) ;
-     void setBeanDefinition(Class<?> clazz);
-     void addAutoElement(AutoElement autoElement);
-     void addAllAutoElement(List<AutoElement> autoElement);
-     Map<AutoElement,Boolean> getAutoElementMap() ;
+
+    boolean getLazy();
+
+    void setLazy(boolean lazy);
+
+    Class<?> getClazz();
+
+    void setClazz(Class<?> clazz);
+
+    String getClassName();
+
+    void setClassName(String className);
+
+    String getScope();
+
+    void setScope(String scope);
+
+    void setBeanDefinition(Class<?> clazz);
+
+    void addAutoElement(AutoElement autoElement);
+
+    void addAllAutoElement(List<AutoElement> autoElement);
+
+    //需要进行依赖注入的属性及其是否被注入
+    Map<AutoElement, Boolean> getAutoElementMap();
+
+    void setAspect(Boolean Aspect);
+
+    boolean getAspect();
+
 
 }

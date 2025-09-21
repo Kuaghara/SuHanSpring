@@ -1,17 +1,16 @@
 package org.example.spring.proxy.context;
 
 import org.example.spring.proxy.annotation.Around;
-import org.example.spring.proxy.annotation.Aspect;
 
 import java.lang.reflect.Method;
 
-public class AroundPoint implements PointParser{
+public class AroundPoint implements PointParser {
     @Override
     public Advisor getAdvisor(Method method, Object aspect) {
         Method[] methods = aspect.getClass().getDeclaredMethods();
         Method AroundMethod = null;
-        for (Method m : methods){
-            if(m.isAnnotationPresent(Around.class)){
+        for (Method m : methods) {
+            if (m.isAnnotationPresent(Around.class)) {
                 AroundMethod = m;
             }
         }
@@ -25,9 +24,9 @@ public class AroundPoint implements PointParser{
 
             @Override
             public Advice getAdvice() {
-                return methodInvocation->{
+                return methodInvocation -> {
                     ProceedingJoinPoint joinPoint = new ProceedingJoinPoint(methodInvocation);
-                    return finalAroundMethod.invoke(aspect,joinPoint);
+                    return finalAroundMethod.invoke(aspect, joinPoint);
                 };
             }
 
