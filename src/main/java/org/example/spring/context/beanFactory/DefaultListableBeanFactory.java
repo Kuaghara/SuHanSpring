@@ -1,5 +1,7 @@
 package org.example.spring.context.beanFactory;
 
+import org.example.spring.beanFactoryPostProcessor.PostProcessorRegistrationDelegate;
+import org.example.spring.beanPostProcessor.BeanFactoryPostProcessor;
 import org.example.spring.beanPostProcessor.BeanPostProcessor;
 import org.example.spring.beanPostProcessor.SmartInitializationAwareBeanPostProcessor;
 import org.example.spring.beanPostProcessor.SmartInstantiationAwareBeanPostProcessor;
@@ -23,6 +25,7 @@ public class DefaultListableBeanFactory implements ConfigurableListableBeanFacto
     private AbstractDefaultListableBeanFactory abstractFactory;
     ClassLoader SUHANCLASSLOADER;
     private Map<String, ObjectFactory<?>> singletonFactories = new HashMap<>();//三级缓存
+    private List<BeanFactoryPostProcessor> beanFactoryPostProcessors = new ArrayList<>();
 
 
     //此处除了实现接口以外还要想办法依靠初始化和类的多层调用把生命周期走完，一点一点优化吧
@@ -33,6 +36,9 @@ public class DefaultListableBeanFactory implements ConfigurableListableBeanFacto
     //在经过仔细思考以及查看spring实例后只能将beanPostProcessor的扫描安排在这里
     //我本打算放在初始化方法的无参调用上的
     public void refresh() {
+
+        invokeBeanFactoryPostProcessors(this);
+
         beanPostProcessorReader(beanDefinitionMap);
 
         /*---------此处已视为beanDefinition_Map生成完毕，并没有考虑bean拥有父类------------- */
@@ -147,6 +153,10 @@ public class DefaultListableBeanFactory implements ConfigurableListableBeanFacto
         return bean;
     }
 
+     private void invokeBeanFactoryPostProcessors(DefaultListableBeanFactory factory){
+         PostProcessorRegistrationDelegate.registerBeanPostProcessors(factory);
+     }
+
 
     /*------------下面都是一些简单的接口方法实现------------*/
     @Override
@@ -188,8 +198,13 @@ public class DefaultListableBeanFactory implements ConfigurableListableBeanFacto
 
     //这里套娃
     @Override
-    public <T> T getBean(String benaName, Class<T> clazz) throws Exception {
-        return clazz.cast(getBean(benaName));
+    public <T> T getBean(String beanName, Class<T> clazz)  {
+        try {
+            return clazz.cast(getBean(beanName));
+        } catch (Exception e) {
+            System.out.println("无法强制转换获取到的bean");
+            throw new RuntimeException(e);
+        }
     }
 
     @Override
@@ -261,5 +276,34 @@ public class DefaultListableBeanFactory implements ConfigurableListableBeanFacto
     @Override
     public Object getFactory(String beanName) {
         return singletonFactories.get(beanName);
+    }
+
+    public List<BeanFactoryPostProcessor> getBeanFactoryPostProcessors() {
+        return this.beanFactoryPostProcessors;
+    }
+
+    @Override
+    public Boolean isTypeMatch(String name, Class<?> clazz) {
+        Class<?> type = this.beanDefinitionMap.get(name).getClazz();
+        if(type == null){
+            return false;
+        }
+        return type == clazz;
+    }
+
+    @Override
+    public List<String> getBeanNameForType(Class<?> clazz) {
+        List<String> beanNameList = new ArrayList<>();
+        for (Map.Entry<String, Object> entry : singletonObjects.entrySet()){
+            if(clazz.isInstance(entry.getValue())){
+                beanNameList.add(entry.getKey());
+            }
+        }
+        return beanNameList;
+    }
+
+    @Override
+    public List<String> getBeanDefinitionNames() {
+        return new ArrayList<>(beanDefinitionMap.keySet());
     }
 }
