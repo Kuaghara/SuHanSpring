@@ -1,9 +1,8 @@
 package org.example.spring.beanFactoryPostProcessor;
 
 import org.example.spring.beanPostProcessor.BeanDefinitionRegistryPostProcessor;
-import org.example.spring.beanPostProcessor.BeanFactoryPostProcessor;
-import org.example.spring.context.beanFactory.BeanDefinitionRegistry;
-import org.example.spring.context.beanFactory.BeanFactory;
+import org.example.spring.beanFactoryPostProcessor.BeanFactoryPostProcessor;
+import org.example.spring.beanPostProcessor.BeanPostProcessor;
 import org.example.spring.context.beanFactory.ConfigurableListableBeanFactory;
 import org.example.spring.context.beanFactory.DefaultListableBeanFactory;
 
@@ -13,7 +12,7 @@ import java.util.List;
 
 public class PostProcessorRegistrationDelegate {
     private PostProcessorRegistrationDelegate(){}
-    public static void registerBeanPostProcessors(DefaultListableBeanFactory beanFactory){
+    public static void invokeBeanFactoryPostProcessors(DefaultListableBeanFactory beanFactory){
         // 思路：
         // 1.从beanFactory中获取已经注册的beanFactoryPostProcessor √
         // 2.把BeanDefinitionRegistryPostProcessor提取出来，然后进行调用扫描 √
@@ -23,19 +22,20 @@ public class PostProcessorRegistrationDelegate {
         // 6.再次从beanFactory中获取beanFactoryPostProcessor
         // 7.根据order相关接口进行分类并且调用（postProcessBeanFactory方法）
         // 本人感觉application的初始化流程就是在此处完成的
+        //yysy，写着写着感觉就成抄了:(
 
         List<String> processingBeans = new ArrayList<>();//记录被扫描的Bean
 
         /// --------------------------一阶段--------------------------------///
 
         List<BeanFactoryPostProcessor> firstBeanFactoryPostProcessors = beanFactory.getBeanFactoryPostProcessors();
-        List<BeanDefinitionRegistryPostProcessor> registryedPostProcessors = new ArrayList<>(); //这个相当于运行完方法的bean
+        List<BeanDefinitionRegistryPostProcessor> registeredPostProcessors = new ArrayList<>(); //这个相当于运行完方法的bean
         List<BeanFactoryPostProcessor> commonlyPostProcessors = new ArrayList<>();
 
         for(BeanFactoryPostProcessor beanFactoryPostProcessor : firstBeanFactoryPostProcessors){
             if(beanFactoryPostProcessor instanceof BeanDefinitionRegistryPostProcessor beanDefinitionRegistryPostProcessor){
                 beanDefinitionRegistryPostProcessor.postProcessBeanDefinitionRegistry(beanFactory);
-                registryedPostProcessors.add(beanDefinitionRegistryPostProcessor);
+                registeredPostProcessors.add(beanDefinitionRegistryPostProcessor);
             }
             else{
                 commonlyPostProcessors.add(beanFactoryPostProcessor);
@@ -49,14 +49,15 @@ public class PostProcessorRegistrationDelegate {
 
         for(String beanName : beanNameList){
             if(beanFactory.isTypeMatch(beanName, PriorityOrdered.class)){
+
                 BeanDefinitionRegistryPostProcessor beanDefinitionRegistryPostProcessor = beanFactory.getBean(beanName, BeanDefinitionRegistryPostProcessor.class);
                 currentPostProcessors.add(beanDefinitionRegistryPostProcessor);
                 processingBeans.add(beanName);
             }
         }
-        invokePostProcessors(currentPostProcessors, beanFactory, registryedPostProcessors );
-        registryedPostProcessors.addAll(currentPostProcessors);
-        sortPostProcessors(registryedPostProcessors);
+        invokePostProcessors(currentPostProcessors, beanFactory, registeredPostProcessors );
+        registeredPostProcessors.addAll(currentPostProcessors);
+        sortPostProcessors(registeredPostProcessors);
         currentPostProcessors.clear();
 
         for(String beanName : beanNameList){
@@ -65,9 +66,9 @@ public class PostProcessorRegistrationDelegate {
                 currentPostProcessors.add(beanDefinitionRegistryPostProcessor);
             }
         }
-        invokePostProcessors(currentPostProcessors, beanFactory, registryedPostProcessors );
-        registryedPostProcessors.addAll(currentPostProcessors);
-        sortPostProcessors(registryedPostProcessors);
+        invokePostProcessors(currentPostProcessors, beanFactory, registeredPostProcessors );
+        registeredPostProcessors.addAll(currentPostProcessors);
+        sortPostProcessors(registeredPostProcessors);
         currentPostProcessors.clear();
 
         Boolean isContinue = true;
@@ -82,13 +83,13 @@ public class PostProcessorRegistrationDelegate {
                     isContinue = true;
                 }
             }
-            invokePostProcessors(currentPostProcessors, beanFactory, registryedPostProcessors );
-            registryedPostProcessors.addAll(currentPostProcessors);
-            sortPostProcessors(registryedPostProcessors);
+            invokePostProcessors(currentPostProcessors, beanFactory, registeredPostProcessors );
+            registeredPostProcessors.addAll(currentPostProcessors);
+            sortPostProcessors(registeredPostProcessors);
             currentPostProcessors.clear();
         }
 
-        invokeBeanFactoryPostProcessors(registryedPostProcessors, beanFactory);
+        invokeBeanFactoryPostProcessors(registeredPostProcessors, beanFactory);
         invokeBeanFactoryPostProcessors(commonlyPostProcessors, beanFactory);
 
         /// ---------------------------三阶段--------------------------------///
@@ -121,6 +122,15 @@ public class PostProcessorRegistrationDelegate {
         invokeBeanFactoryPostProcessors(priorityOrderedPostProcessors, beanFactory);
         invokeBeanFactoryPostProcessors(orderedPostProcessors, beanFactory);
         invokeBeanFactoryPostProcessors(commonPostProcessors, beanFactory);
+        /// -----------------------------四阶段--------------------------------///
+        /// 此处为我自己编写的逻辑
+        /// 此处将所有的beanPostProcessor进行注册
+        beanNameList = beanFactory.getBeanNameForType(BeanPostProcessor.class);
+        for(String beanName : beanNameList){
+            BeanPostProcessor beanPostProcessor = beanFactory.getBean(beanName, BeanPostProcessor.class);
+            beanFactory.addBeanPostProcessor(beanPostProcessor);
+        }
+
     }
 
     private static void sortPostProcessors(List<? extends BeanFactoryPostProcessor> postProcessors){

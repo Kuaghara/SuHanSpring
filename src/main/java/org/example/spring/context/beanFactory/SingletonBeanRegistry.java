@@ -7,6 +7,12 @@ public interface SingletonBeanRegistry {
 
     boolean containsSingleton(String beanName);
 
+    boolean containsEarlyBean(String beanName);
+
+    void addEarlyBean(String beanName , Object earlyBean);
+
+    void removeEarlyBean(String beanName);
+
     Object getEarlyBean(String beanName);
 
     void registerEarlyBean(String beanName, Object bean);

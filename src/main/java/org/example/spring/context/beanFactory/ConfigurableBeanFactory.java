@@ -6,4 +6,6 @@ public interface ConfigurableBeanFactory extends HierarchicalBeanFactory, Single
     BeanFactory getParentBeanFactory();
 
     void setBeanClassLoader(ClassLoader beanClassLoader);
+
+    void preInstantiateSingletons();
 }

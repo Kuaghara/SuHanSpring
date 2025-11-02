@@ -1,16 +1,11 @@
 package org.example.entity;
 
-import org.example.User;
 import org.example.spring.annotation.Autowired;
 import org.example.spring.annotation.Component;
+import org.example.spring.annotation.ComponentScan;
 
 @Component
-public class CircularDependency_Test {
+public class Crt2 {
     @Autowired
-    private Crt2 crt2;
-
-    public CircularDependency_Test() {
-    }
-
-
+    private CircularDependency_Test crt1;
 }

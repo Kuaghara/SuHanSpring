@@ -11,4 +11,6 @@ public interface AbstractFactory {
     Object createBean(BeanDefinition beanDefinition) throws Exception;
 
     Object instantiationBean(BeanDefinition bd);
+
+    Object getSingleton(String name , ObjectFactory<?> singletonFactory);
 }

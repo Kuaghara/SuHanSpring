@@ -13,10 +13,10 @@ public class GenericBeanDefinition implements BeanDefinition {
     private String className;//bean的名字
     private Class<?> clazz;//bean的Class反射类
     private String scope = "singleton";//bean的作用域
+    private boolean singleton = true;
     private boolean lazy = false;//bean的懒加载
     private Map<AutoElement, Boolean> autoElementMap = new HashMap<>();//拿来存放字段以及是否被注入
-    private boolean aspect = false;
-
+    private boolean isFullConfigurationClass = false;
     //其余的先不实现
 
 
@@ -34,13 +34,24 @@ public class GenericBeanDefinition implements BeanDefinition {
             setLazy(declaredAnnotation.value());
         }
 
-        //查找@Aspect注解
-        if (clazz.isAnnotationPresent(Aspect.class)) {
-            setAspect( true );
-        }
-
         setClassName(clazz.getSimpleName());
         setClazz(clazz);
+    }
+
+
+    @Override
+    public boolean isSingleton() {
+        return singleton;
+    }
+
+    @Override
+    public boolean isPrototype() {
+        return !singleton;
+    }
+
+    @Override
+    public String getScope() {
+        return scope;
     }
 
     @Override
@@ -81,17 +92,15 @@ public class GenericBeanDefinition implements BeanDefinition {
     }
 
     @Override
-    public String getScope() {
-        return scope;
-    }
-
-    @Override
     public void setScope(String scope) {
         this.scope = scope;
+        if(scope.equals("prototype")) {
+            this.singleton = false;
+        }
     }
 
     @Override
-    public boolean getLazy() {
+    public boolean isLazy() {
         return lazy;
     }
 
@@ -101,13 +110,12 @@ public class GenericBeanDefinition implements BeanDefinition {
     }
 
     @Override
-    public void setAspect(Boolean Aspect) {
-        this.aspect = Aspect;
+    public void setFullConfigurationClass(boolean fullConfigurationClass) {
+        this.isFullConfigurationClass = fullConfigurationClass;
     }
 
     @Override
-    public boolean getAspect() {
-        return aspect;
+    public boolean getFullConfigurationClass() {
+        return this.isFullConfigurationClass;
     }
-
 }

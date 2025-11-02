@@ -18,8 +18,27 @@ public class AnnotatedGenericBeanDefinition implements BeanDefinition {
     private Boolean lazy = false;
     private List<Annotation> annotations = new ArrayList<>();
     private Map<AutoElement, Boolean> autoElementMap = new HashMap<>();//拿来存放字段以及是否被注入
-    private boolean aspect = false;
+    private Boolean isFullConfigurationClass = false;
+    private boolean singleton = true;
 
+    public AnnotatedGenericBeanDefinition() {}
+
+    // 10.13:
+    //在后续编写中中我感觉使用构造方法来自动构建一个BeanDefinition会相对舒服一些，之前的方法也不会乱动
+    public AnnotatedGenericBeanDefinition(Class<?> clazz) {
+        setBeanDefinition(clazz);
+    }
+
+
+    @Override
+    public boolean isSingleton() {
+        return singleton;
+    }
+
+    @Override
+    public boolean isPrototype() {
+        return !singleton;
+    }
 
     @Override
     public void setBeanDefinition(Class<?> clazz) {
@@ -35,10 +54,6 @@ public class AnnotatedGenericBeanDefinition implements BeanDefinition {
             setLazy(declaredAnnotation.value());
         }
 
-        //查找@Aspect注解,Aspect注解中并没值，此处只需查找
-        if (clazz.isAnnotationPresent(Aspect.class)) {
-            setAspect( true );
-        }
 
         setClassName(clazz.getSimpleName());
         setClazz(clazz);
@@ -66,7 +81,7 @@ public class AnnotatedGenericBeanDefinition implements BeanDefinition {
 
 
     @Override
-    public boolean getLazy() {
+    public boolean isLazy() {
         return lazy;
     }
 
@@ -103,6 +118,9 @@ public class AnnotatedGenericBeanDefinition implements BeanDefinition {
     @Override
     public void setScope(String scope) {
         this.scope = scope;
+        if(scope.equals("prototype")) {
+            this.singleton = false;
+        }
     }
 
     public void addOneAnnotation(Annotation annotation) {
@@ -118,12 +136,12 @@ public class AnnotatedGenericBeanDefinition implements BeanDefinition {
     }
 
     @Override
-    public void setAspect(Boolean Aspect) {
-        this.aspect = Aspect;
+    public boolean getFullConfigurationClass() {
+        return isFullConfigurationClass;
     }
 
     @Override
-    public boolean getAspect() {
-        return aspect;
+    public void setFullConfigurationClass(boolean fullConfigurationClass) {
+        isFullConfigurationClass = fullConfigurationClass;
     }
 }

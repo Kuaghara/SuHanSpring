@@ -56,7 +56,6 @@ public class AnnotationResolver {
             }
             if (method.isAnnotationPresent(Around.class)) {
                 try {
-
                     Object aspect = beanClass.getDeclaredConstructor().newInstance();
                     AroundPoint aroundPoint = new AroundPoint();
                     Advisor advisor = aroundPoint.getAdvisor(method, aspect);

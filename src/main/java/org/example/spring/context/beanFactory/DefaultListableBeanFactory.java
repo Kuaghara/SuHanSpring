@@ -1,13 +1,19 @@
 package org.example.spring.context.beanFactory;
 
+import org.example.spring.annotation.Autowired;
+import org.example.spring.annotation.Order;
+import org.example.spring.beanFactoryPostProcessor.ConfigurationClassParser;
 import org.example.spring.beanFactoryPostProcessor.PostProcessorRegistrationDelegate;
-import org.example.spring.beanPostProcessor.BeanFactoryPostProcessor;
+import org.example.spring.beanFactoryPostProcessor.BeanFactoryPostProcessor;
 import org.example.spring.beanPostProcessor.BeanPostProcessor;
 import org.example.spring.beanPostProcessor.SmartInitializationAwareBeanPostProcessor;
 import org.example.spring.beanPostProcessor.SmartInstantiationAwareBeanPostProcessor;
+import org.example.spring.context.reader.AnnotationBeanDefinitionReader;
 import org.example.spring.informationEntity.AutoElement;
 import org.example.spring.informationEntity.BeanDefinition;
+import org.example.spring.util.AnnotationUtil;
 
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
@@ -17,75 +23,30 @@ import java.util.Map;
 
 public class DefaultListableBeanFactory implements ConfigurableListableBeanFactory, BeanDefinitionRegistry {
 
-    Map<String, BeanDefinition> beanDefinitionMap = new HashMap<>();//用于存储beanDefinition
-    Map<String, Object> singletonObjects = new HashMap<>();//一层缓存，存储单例Bean
-    Map<String, Object> earlySingletonObjects = new HashMap<>();  //二层缓存
-    private BeanFactory parentBeanFactory;//拿来存储父beanFactory
-    private List<BeanPostProcessor> beanPostProcessors = new ArrayList<>();//存储beanPostProcessor(内部存储的都是生成好的实例)
+    /// 存储beanDefinition
+    Map<String, BeanDefinition> beanDefinitionMap = new HashMap<>();
+    /// 一层缓存，存储单例Bean
+    Map<String, Object> singletonObjects = new HashMap<>();
+    /// 二层缓存
+    Map<String, Object> earlySingletonObjects = new HashMap<>();
+    /// 三层缓存
+    private Map<String, ObjectFactory<?>> singletonFactories = new HashMap<>();
+    /// 拿来存储父beanFactory
+    private BeanFactory parentBeanFactory;
+    /// 存储beanPostProcessor(内部存储的都是生成好的实例)
+    private List<BeanPostProcessor> beanPostProcessors = new ArrayList<>();
+    /// 存储抽象工厂
     private AbstractDefaultListableBeanFactory abstractFactory;
     ClassLoader SUHANCLASSLOADER;
-    private Map<String, ObjectFactory<?>> singletonFactories = new HashMap<>();//三级缓存
+
     private List<BeanFactoryPostProcessor> beanFactoryPostProcessors = new ArrayList<>();
 
-
-    //此处除了实现接口以外还要想办法依靠初始化和类的多层调用把生命周期走完，一点一点优化吧
+    public boolean cyclicDependent = true;
 
     public DefaultListableBeanFactory() {
-    }
-
-    //在经过仔细思考以及查看spring实例后只能将beanPostProcessor的扫描安排在这里
-    //我本打算放在初始化方法的无参调用上的
-    public void refresh() {
-
-        invokeBeanFactoryPostProcessors(this);
-
-        beanPostProcessorReader(beanDefinitionMap);
-
-        /*---------此处已视为beanDefinition_Map生成完毕，并没有考虑bean拥有父类------------- */
-        //此处的想法是进行@Autowired注解的扫描和@Aspect注解的扫描
-        applySmartInstantiationBeanPostProcessor(true, null);
-        //此处将跳跃到abstractFactory
         abstractFactory = new AbstractDefaultListableBeanFactory(this);
-        try {
-            abstractFactory.creatSingletonBeans(beanDefinitionMap);
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-        //之后还得添加@import注解和相关逻辑
     }
 
-
-    //此处设计是用来对我编写的两个BeanPostProcessor进行调用
-    //设想：三个注解扫描的
-    public void applySmartInstantiationBeanPostProcessor(Boolean isBefore, BeanDefinition bd) {
-        for (BeanPostProcessor bp : beanPostProcessors) {
-            if (bp instanceof SmartInstantiationAwareBeanPostProcessor) {
-                if (isBefore) {
-                    ((SmartInstantiationAwareBeanPostProcessor) bp).applyBeforeInstantiationMethod();
-                } else {
-                    try {
-                        ((SmartInstantiationAwareBeanPostProcessor) bp).applyAfterInstantiationMethod(bd);
-                    } catch (Exception e) {
-                        throw new RuntimeException(e);
-                    }
-                }
-            }
-        }
-    }
-
-    //设想：依赖注入的
-    public Object applySmartInitializationAwareBeanPostProcessor(Boolean isBefore, Object bean) {
-        for (BeanPostProcessor bp : beanPostProcessors) {
-            if (bp instanceof SmartInitializationAwareBeanPostProcessor) {
-                if (isBefore) {
-                    return (((SmartInitializationAwareBeanPostProcessor) bp).applyBeforeInitializationMethod(bean));
-                } else {
-                    ((SmartInitializationAwareBeanPostProcessor) bp).applyAfterInitializationMethod();
-                }
-            }
-        }
-        return bean;
-    }
 
     public void addBeanPostProcessor(BeanPostProcessor beanPostProcessor) {
         beanPostProcessors.add(beanPostProcessor);
@@ -113,52 +74,87 @@ public class DefaultListableBeanFactory implements ConfigurableListableBeanFacto
     }
 
     @Override
-    public Object getBean(String beanName) throws Exception {
+    public Object getBean(String beanName) {
         if (!beanDefinitionMap.containsKey(beanName)) {
             throw new RuntimeException(beanName + "不存在");
         }
-        Object bean = singletonObjects.get(beanName);
+        Object bean = getSingleton(beanName);
         if (bean == null) {
             bean = earlySingletonObjects.get(beanName);
             BeanDefinition bd = beanDefinitionMap.get(beanName);
-            if (bean != null && bd.getScope().equals("singleton")) {
+            if (bean != null && bd.isSingleton()) {
                 return doGetBean(beanName);
             } else if (bean == null) {
-                bean = abstractFactory.createBean(bd);
+                bean = abstractFactory.doGetBean(beanName);
             }
         }
         return bean;
     }
 
-    public Object doGetBean(String beanName) {
-        Object bean = getEarlyBean(beanName);
-        BeanDefinition bd = beanDefinitionMap.get(beanName);
-        for (Map.Entry<AutoElement, Boolean> entry : bd.getAutoElementMap().entrySet()) {
-            if (!entry.getValue()) {
-                Field field = entry.getKey().getField();
-                String fieldName = field.getType().getSimpleName();
-                ObjectFactory<?> oneObjectFactory = this.singletonFactories.get(fieldName);
-                if (oneObjectFactory != null) {
-                    try {
-                        Object oneBean = oneObjectFactory.getObject(abstractFactory);
-                        field.setAccessible(true);
-                        field.set(bean, oneBean);
-                        removeFactory(beanName);
-                    } catch (Exception e) {
-                        throw new RuntimeException(e);
+     @Override
+    public void preInstantiateSingletons() {
+        List<BeanDefinition> bds = new ArrayList<>(beanDefinitionMap.values());
+        try{
+            // 此处我要添加一个对beanDefinitions的排序
+            beanDefinitionSort(bds);
+            for (BeanDefinition bd : bds){
+                String bdName = bd.getClassName();
+                if (bd.isSingleton() && !bd.isLazy()) {
+                    registerSingleton(bdName, abstractFactory.doGetBean(bdName));
+                    removeEarlyBean(bdName);
+                }
+            }
+        }
+        catch (Exception e){
+            throw new RuntimeException(e+"此处为工厂创建剩余bean错误");
+        }
+    }
+
+    private void beanDefinitionSort(List<BeanDefinition> beanDefinitionList) {
+        ConfigurationClassParser parser = new ConfigurationClassParser(new AnnotationBeanDefinitionReader(this));
+        for(int i = 0; i < beanDefinitionList.size(); i++){
+            for(int j = i + 1; j < beanDefinitionList.size(); j++){
+                BeanDefinition bd1 = beanDefinitionList.get(i);
+                BeanDefinition bd2 = beanDefinitionList.get(j);
+                List<Annotation> ann1 = parser.parseAnnotation(bd1.getClazz(),new ArrayList<>());
+                List<Annotation> ann2 = parser.parseAnnotation(bd2.getClazz(),new ArrayList<>());
+                if(AnnotationUtil.listIncludeAnnotation(ann1, Order.class)){
+                    if(AnnotationUtil.listIncludeAnnotation(ann2, Order.class)){
+                        if(getOrderCount(ann1) < getOrderCount(ann2)){
+                           AnnotationUtil.ChangeLocation(beanDefinitionList, i, j);
+                        }
+                    }
+                }
+                else {
+                    if (AnnotationUtil.listIncludeAnnotation(ann2, Order.class)){
+                        AnnotationUtil.ChangeLocation(beanDefinitionList, i, j);
                     }
                 }
             }
         }
-        return bean;
     }
 
-     private void invokeBeanFactoryPostProcessors(DefaultListableBeanFactory factory){
-         PostProcessorRegistrationDelegate.registerBeanPostProcessors(factory);
-     }
+    private int getOrderCount(List<Annotation> a1){
+        for(Annotation ann : a1){
+            if(ann instanceof Order){
+                return ((Order) ann).value();
+            }
+        }
+        return 0;
+    }
 
 
     /*------------下面都是一些简单的接口方法实现------------*/
+
+    public void addBeanFactoryPostProcessor(BeanFactoryPostProcessor beanFactoryPostProcessor) {
+        beanFactoryPostProcessors.add(beanFactoryPostProcessor);
+    }
+
+    @Override
+    public void cyclicDependentState(boolean state) {
+       cyclicDependent = state;
+    }
+
     @Override
     public void setBeanClassLoader(ClassLoader beanClassLoader) {
         SUHANCLASSLOADER = beanClassLoader;
@@ -256,13 +252,9 @@ public class DefaultListableBeanFactory implements ConfigurableListableBeanFacto
         return beanDefinitionMap;
     }
 
-    public BeanPostProcessor  getBeanPostProcessor(Class clazz){
-        for(BeanPostProcessor bp:beanPostProcessors){
-            if(clazz.isAssignableFrom(bp.getClass())){
-                return bp;
-            }
-        }
-        return null;
+    @Override
+    public boolean containsEarlyBean(String beanName) {
+        return earlySingletonObjects.containsKey(beanName);
     }
 
     public void addFactory(String name, ObjectFactory<Object> factory) {
@@ -274,7 +266,7 @@ public class DefaultListableBeanFactory implements ConfigurableListableBeanFacto
     }
 
     @Override
-    public Object getFactory(String beanName) {
+    public ObjectFactory<?> getFactory(String beanName) {
         return singletonFactories.get(beanName);
     }
 
@@ -288,14 +280,14 @@ public class DefaultListableBeanFactory implements ConfigurableListableBeanFacto
         if(type == null){
             return false;
         }
-        return type == clazz;
+        return clazz.isAssignableFrom(type);
     }
 
     @Override
     public List<String> getBeanNameForType(Class<?> clazz) {
         List<String> beanNameList = new ArrayList<>();
-        for (Map.Entry<String, Object> entry : singletonObjects.entrySet()){
-            if(clazz.isInstance(entry.getValue())){
+        for (Map.Entry<String, BeanDefinition> entry : beanDefinitionMap.entrySet()){
+            if(clazz.isAssignableFrom(entry.getValue().getClazz())){
                 beanNameList.add(entry.getKey());
             }
         }
@@ -305,5 +297,109 @@ public class DefaultListableBeanFactory implements ConfigurableListableBeanFacto
     @Override
     public List<String> getBeanDefinitionNames() {
         return new ArrayList<>(beanDefinitionMap.keySet());
+    }
+
+    @Override
+    public void addEarlyBean(String beanName, Object earlyBean) {
+        earlySingletonObjects.put(beanName, earlyBean);
+    }
+
+    @Override
+    public void removeEarlyBean(String beanName) {
+        earlySingletonObjects.remove(beanName);
+    }
+
+    /*--------------弃置方法-----------------*/
+
+    @Deprecated
+    //在经过仔细思考以及查看spring实例后只能将beanPostProcessor的扫描安排在这里
+    //我本打算放在初始化方法的无参调用上的
+    public void refresh() {
+
+        invokeBeanFactoryPostProcessors(this);
+
+        beanPostProcessorReader(beanDefinitionMap);
+
+        /*---------此处已视为beanDefinition_Map生成完毕，并没有考虑bean拥有父类------------- */
+        //此处的想法是进行@Autowired注解的扫描和@Aspect注解的扫描
+        applySmartInstantiationBeanPostProcessor(true, null);
+        //此处将跳跃到abstractFactory
+        abstractFactory = new AbstractDefaultListableBeanFactory(this);
+        try {
+            abstractFactory.creatSingletonBeans(beanDefinitionMap);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+        //之后还得添加@import注解和相关逻辑
+    }
+
+    @Deprecated
+    //此处设计是用来对我编写的两个BeanPostProcessor进行调用
+    //设想：三个注解扫描的
+    public void applySmartInstantiationBeanPostProcessor(Boolean isBefore, BeanDefinition bd) {
+        for (BeanPostProcessor bp : beanPostProcessors) {
+            if (bp instanceof SmartInstantiationAwareBeanPostProcessor) {
+                if (isBefore) {
+                    ((SmartInstantiationAwareBeanPostProcessor) bp).applyBeforeInstantiationMethod();
+                } else {
+                    try {
+                        ((SmartInstantiationAwareBeanPostProcessor) bp).applyAfterInstantiationMethod(bd);
+                    } catch (Exception e) {
+                        throw new RuntimeException(e);
+                    }
+                }
+            }
+        }
+    }
+
+    @Deprecated
+    //设想：依赖注入的
+    public Object applySmartInitializationAwareBeanPostProcessor(Boolean isBefore, Object bean) {
+        for (BeanPostProcessor bp : beanPostProcessors) {
+            if (bp instanceof SmartInitializationAwareBeanPostProcessor) {
+                if (isBefore) {
+                    return (((SmartInitializationAwareBeanPostProcessor) bp).applyBeforeInitializationMethod(bean));
+                }
+            }
+        }
+        return bean;
+    }
+
+    @Deprecated
+    public Object doGetBean(String beanName) {
+        Object bean = getEarlyBean(beanName);
+        BeanDefinition bd = beanDefinitionMap.get(beanName);
+        for (Map.Entry<AutoElement, Boolean> entry : bd.getAutoElementMap().entrySet()) {
+            if (!entry.getValue()) {
+                Field field = entry.getKey().getField();
+                String fieldName = field.getType().getSimpleName();
+                ObjectFactory<?> oneObjectFactory = this.singletonFactories.get(fieldName);
+                if (oneObjectFactory != null) {
+                    try {
+                        Object oneBean = oneObjectFactory.getObject();
+                        field.setAccessible(true);
+                        field.set(bean, oneBean);
+                        removeFactory(beanName);
+                    } catch (Exception e) {
+                        throw new RuntimeException(e);
+                    }
+                }
+            }
+        }
+        return bean;
+    }
+
+    @Deprecated
+    private void invokeBeanFactoryPostProcessors(DefaultListableBeanFactory factory){
+        PostProcessorRegistrationDelegate.invokeBeanFactoryPostProcessors(factory);
+    }
+    @Deprecated
+    public BeanPostProcessor  getBeanPostProcessor(Class<?> clazz){
+        for(BeanPostProcessor bp:beanPostProcessors){
+            if(clazz.isAssignableFrom(bp.getClass())){
+                return bp;
+            }
+        }
+        return null;
     }
 }

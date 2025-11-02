@@ -4,7 +4,7 @@ import java.lang.reflect.Field;
 
 public class AutowiredFieldElement implements AutoElement {
     Field field;
-    boolean required;
+    boolean required = false;
 
     public boolean isRequired() {
         return required;

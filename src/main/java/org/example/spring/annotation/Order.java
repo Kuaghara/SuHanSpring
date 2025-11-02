@@ -1,7 +1,4 @@
-package org.example.spring.proxy.annotation;
-
-
-import org.example.spring.annotation.Order;
+package org.example.spring.annotation;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -10,6 +7,6 @@ import java.lang.annotation.Target;
 
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)
-@Order(8)
-public @interface Aspect {
+public @interface Order {
+    int value() default 0;
 }

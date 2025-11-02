@@ -21,4 +21,5 @@ public interface BeanDefinitionRegistry {
     List<String> getBeanNameForType(Class<?> type);
 
     List<String> getBeanDefinitionNames();
+
 }

@@ -16,7 +16,8 @@ public class ScannedGenericBeanDefinition implements BeanDefinition {
     private String className;//在扫描完后名字存储的并不是名字
     private String path;
     private Map<AutoElement, Boolean> autoElementMap = new HashMap<>();//拿来存放字段以及是否被注入
-    private boolean aspect = false;
+    private boolean isFullConfigurationClass = false;
+    private boolean singleton = true;
 
     @Override
     public void setBeanDefinition(Class<?> clazz) {
@@ -32,16 +33,22 @@ public class ScannedGenericBeanDefinition implements BeanDefinition {
             setLazy(declaredAnnotation.value());
         }
 
-        //查找@Aspect注解
-        if (clazz.isAnnotationPresent(Aspect.class)) {
-            setAspect( true );
-        }
-
         setClassName(clazz.getSimpleName());
         setClazz(clazz);
 
         //特别实现
         setPath(clazz.getPackage().getName() + "." + clazz.getSimpleName());
+    }
+
+
+    @Override
+    public boolean isSingleton() {
+        return singleton;
+    }
+
+    @Override
+    public boolean isPrototype() {
+        return !singleton;
     }
 
     @Override
@@ -70,10 +77,13 @@ public class ScannedGenericBeanDefinition implements BeanDefinition {
     @Override
     public void setScope(String scope) {
         this.scope = scope;
+        if(scope.equals("prototype")) {
+            this.singleton = false;
+        }
     }
 
     @Override
-    public boolean getLazy() {
+    public boolean isLazy() {
         return lazy;
     }
 
@@ -111,13 +121,12 @@ public class ScannedGenericBeanDefinition implements BeanDefinition {
     }
 
     @Override
-    public void setAspect(Boolean Aspect) {
-        this.aspect = Aspect;
+    public boolean getFullConfigurationClass() {
+        return isFullConfigurationClass;
     }
 
     @Override
-    public boolean getAspect() {
-        return aspect;
+    public void setFullConfigurationClass(boolean fullConfigurationClass) {
+        this.isFullConfigurationClass = fullConfigurationClass;
     }
-
 }

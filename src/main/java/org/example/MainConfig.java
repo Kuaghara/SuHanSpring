@@ -1,17 +1,11 @@
 package org.example;
 
-import org.example.spring.annotation.Bean;
 import org.example.spring.annotation.ComponentScan;
 import org.example.spring.annotation.Configuration;
-import org.example.spring.proxy.annotation.EnableAsync;
+import org.example.spring.proxy.annotation.EnableAspectJAutoProxy;
 
-@EnableAsync
-@ComponentScan("org.example.entity")
+@EnableAspectJAutoProxy
 @Configuration
+@ComponentScan("org.example.entity")
 public class MainConfig {
-
-    @Bean
-    public User User() {
-        return new User();
-    }
 }

@@ -35,4 +35,53 @@
     我爱睡觉，睡觉真舒服
     重新理了一边思绪，只不过还是没怎么写，看卡莫写的怪怪的
     1.写了点beanFactory的接口，给将来解析配置类做准备
-
+10.13:
+    害害害，来写配置类解析
+    1.修改了AutowiredAnnotationBeanProcessor和ProxyBeanPostProcessor的创造beanDefinition的方法，并更名为asBeanDefinitionAdd
+    2.对AnnotationBeanDefinitionReader中上条的两个beanDefinition的添加进行了修改
+    3.对ConfigurationClassParser进行了部分编写
+    4.为AnnotatedGenericBeanDefinition添加了构造方法,以及是否为全配置类的字段及其getter，setter方法
+10.14：
+    继续，战斗不要停，直接旷课
+    1.新增ClassMetadata和AnnotationMetadata两个接口（感觉没啥用）
+    2.为beanDefinition添加了是否为全配置类的字段以及其相关方法
+    3.完成了对ConfigurationClassParser的编写，但是写完感觉怪怪的
+10.15：
+    请好假了，周六去焰子婚礼！
+    1.对ConfigurationClassParser添加配置类的注解递归解析
+    2.写了两下AnnotationMetadata的实现，然后写了两下感觉又不对
+    3.写了ConfigurationClassParser的注解解析的方法，然后又发现类和实体之间的问题，好了
+    现在在想要不要写工具类了
+    4.写了个AnnotationUtil类，然后把判断List中有无指定类的实例方法写了进去
+    现在的话，大体上有的基本都有了，还要再整理写到application里，然后就该试跑查bug了
+    所以AnnotationMetadata还是没有用到，爱咋地咋地吧
+10.16：
+    滴，老年卡
+    1.新加了applicationContext的相关接口
+    真写不动了，我去，今天刷的真是老年卡啊
+10.23:
+    回来写代码了，焰子人真好
+    1.为AbstractApplicationContext新添注册基础beanProcessor的方法：registrationBasicsBeanFactoryPostProcessors
+10.25：
+    大东北~我的家乡~
+    1.今天主要是看spring的getBean源码流程去了，主要是想知道beanPostProcessor具体是在哪里实现的
+10.26：
+    昨晚花了1个半小时把我的chiffon模型重塑了
+    1.已读完spring源码中的bean生命中周期部分，跳来跳去的，最后干活的就那一两个（红温），已制作流程图
+    2.已架空DefaultListableBeanFactory中的getBean方法，将具体的getBean方法转移到AbstractDefaultListableBeanFactory中
+10.27：
+    我不想上软件测试的课啊，我不想当吃干饭的
+    1.即将重塑AbstractDefaultListableBeanFactory，其功能相当于spring中的AbstractBeanFactory
+    2.将AbstractDefaultListableBeanFactory有关生命周期的流程基本已全部废弃
+    3.为beanDefinition新添singleton布尔参数以及相关方法
+    4.正在编写AbstractDefaultListableBeanFactory的流程...
+10.28：
+    我爱翘课
+    1.我干啥了，我不知道啊，光记得敲代码了
+    2.顺利的话明天就可以试着跑了
+10.30+11.1:
+    1.代码跑动了，然后改好了aop，循环依赖和依赖注入还在改
+11.2:
+    今天看滔博被T1抽陀螺
+    1.重新看了部分循环依赖的课，有重新编写的思路了
+    2.重启SmartInitializationAwareBeanPostProcessor接口，用于解决循环依赖中的提前Aop情况

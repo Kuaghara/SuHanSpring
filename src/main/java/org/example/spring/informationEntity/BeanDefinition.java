@@ -5,8 +5,10 @@ import java.util.Map;
 
 public interface BeanDefinition {
 
+    boolean isSingleton();
+    boolean isPrototype();
 
-    boolean getLazy();
+    boolean isLazy();
 
     void setLazy(boolean lazy);
 
@@ -31,9 +33,7 @@ public interface BeanDefinition {
     //需要进行依赖注入的属性及其是否被注入
     Map<AutoElement, Boolean> getAutoElementMap();
 
-    void setAspect(Boolean Aspect);
+    boolean getFullConfigurationClass();
 
-    boolean getAspect();
-
-
+    void setFullConfigurationClass(boolean fullConfigurationClass);
 }

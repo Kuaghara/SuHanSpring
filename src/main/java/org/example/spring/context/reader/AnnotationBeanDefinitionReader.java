@@ -3,17 +3,12 @@ package org.example.spring.context.reader;
 import org.example.spring.annotation.Bean;
 import org.example.spring.annotation.Component;
 import org.example.spring.annotation.ComponentScan;
-import org.example.spring.beanPostProcessor.AutowiredAnnotationBeanProcessor;
-import org.example.spring.beanPostProcessor.ProxyBeanPostProcessor;
 import org.example.spring.context.beanFactory.BeanDefinitionRegistry;
-import org.example.spring.context.beanFactory.DefaultListableBeanFactory;
-import org.example.spring.context.beanFactory.SingletonBeanRegistry;
 import org.example.spring.informationEntity.AnnotatedGenericBeanDefinition;
 import org.example.spring.informationEntity.BeanDefinition;
 import org.example.spring.informationEntity.ScannedGenericBeanDefinition;
 
 import java.io.File;
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.URL;
 import java.util.ArrayList;
@@ -23,33 +18,20 @@ import java.util.Objects;
 
 public class AnnotationBeanDefinitionReader implements BeanDefinitionReader {
     final private BeanDefinitionRegistry beanDefinitionRegistry;
-    final private SingletonBeanRegistry singletonBeanRegistry;
+
     //对class配置类中的定义的bean进行扫描
 
 
-    public AnnotationBeanDefinitionReader(BeanDefinitionRegistry beanDefinitionRegistry, SingletonBeanRegistry singletonBeanRegistry) {
+    public AnnotationBeanDefinitionReader(BeanDefinitionRegistry beanDefinitionRegistry) {
         this.beanDefinitionRegistry = beanDefinitionRegistry;
-        this.singletonBeanRegistry = singletonBeanRegistry;
-    }
-
-    public AnnotationBeanDefinitionReader(DefaultListableBeanFactory factory){
-        this.beanDefinitionRegistry = factory;
-        this.singletonBeanRegistry = factory;
     }
 
     @Override
     public void loadBeanDefinitions(Class<?> clazz) { //传入一个配置类和一个容器，预想是传一个beanFactory
-        List<BeanDefinition> generateBeanDefinition = doAnnotationLoadBeanDefinitions(clazz);
-        generateBeanDefinition.addAll(doLocationLoadBeanDefinitions(clazz));
+        List<BeanDefinition> generateBeanDefinitions = doAnnotationLoadBeanDefinitions(clazz);
+        generateBeanDefinitions.addAll(doLocationLoadBeanDefinitions(clazz));
 
-        //添加beanFactoryPostProcessor
-        AutowiredAnnotationBeanProcessor autowiredAnnotationBeanProcessor = new AutowiredAnnotationBeanProcessor(singletonBeanRegistry,beanDefinitionRegistry);
-        //proxy在写完import之后会单独写一个@EnableProxy注解来导入
-        ProxyBeanPostProcessor proxyBeanPostProcessor = new ProxyBeanPostProcessor(beanDefinitionRegistry);
-        generateBeanDefinition.add(autowiredAnnotationBeanProcessor.addBeanPostProcessor());
-        generateBeanDefinition.add(proxyBeanPostProcessor.addBeanPostProcessor());
-
-        beanDefinitionRegistry.registerAllBeanDefinition(generateBeanDefinition);
+        beanDefinitionRegistry.registerAllBeanDefinition(generateBeanDefinitions);
     }
 
     private List<BeanDefinition> doAnnotationLoadBeanDefinitions(Class<?> clazz) {

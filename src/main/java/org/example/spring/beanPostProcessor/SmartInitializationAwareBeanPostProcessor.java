@@ -1,19 +1,18 @@
 package org.example.spring.beanPostProcessor;
 
 
-//这个是初始化的
+import org.example.spring.context.beanFactory.ObjectFactory;
+
+/// 此接口重启用于实现用于提前Aop使用
 public interface SmartInitializationAwareBeanPostProcessor extends BeanPostProcessor {
     //此接口设计给依赖注入使用
     default Object applyBeforeInitializationMethod(Object bean) {
         return null;
     }
 
-    ;
 
-    default void applyAfterInitializationMethod() {
-    }
+    default Object applyAfterInitializationMethod(String name , Object  bean) {return null;}
 
-    ;
 
 
 }
