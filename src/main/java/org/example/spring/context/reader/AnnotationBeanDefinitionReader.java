@@ -39,7 +39,7 @@ public class AnnotationBeanDefinitionReader implements BeanDefinitionReader {
         for (Method method : clazz.getDeclaredMethods()) {
             if (method.isAnnotationPresent(Bean.class)) {
                     //创造bean的反射对象
-                    Class<?> targetClass = method.getReturnType().getClass();
+                    Class<?> targetClass = method.getReturnType();
                     BeanDefinition beanDefinition = new AnnotatedGenericBeanDefinition();
                     beanDefinition.setBeanDefinition(targetClass);
                     generateBeanDefinition.add(beanDefinition);

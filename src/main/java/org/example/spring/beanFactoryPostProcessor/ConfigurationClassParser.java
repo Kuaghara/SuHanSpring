@@ -85,8 +85,8 @@ public class ConfigurationClassParser {
         Method[]  methods = configClass.getDeclaredMethods();
         for(Method method : methods){
             if(method.isAnnotationPresent(Bean.class)){
-                Type returnType = method.getGenericReturnType();
-                BeanDefinition beanDefinition = new AnnotatedGenericBeanDefinition(returnType.getClass());
+                Class<?> returnType = method.getReturnType();
+                BeanDefinition beanDefinition = new AnnotatedGenericBeanDefinition(returnType);
                 registry.registerBeanDefinition(beanDefinition.getClassName(), beanDefinition);
             }
         }
