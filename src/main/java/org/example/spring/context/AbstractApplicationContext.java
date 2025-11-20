@@ -8,6 +8,7 @@ import org.example.spring.context.beanFactory.BeanDefinitionRegistry;
 import org.example.spring.context.beanFactory.BeanFactory;
 import org.example.spring.context.beanFactory.ConfigurableListableBeanFactory;
 import org.example.spring.context.beanFactory.DefaultListableBeanFactory;
+import org.example.spring.context.event.*;
 import org.example.spring.informationEntity.AnnotatedGenericBeanDefinition;
 
 import java.util.ArrayList;
@@ -18,6 +19,7 @@ public abstract class AbstractApplicationContext implements ConfigurableApplicat
     List<BeanFactoryPostProcessor> beanFactoryPostProcessors = new ArrayList<>();
     BeanFactory parentBeanFactory;
     boolean circularDependencies = true;
+    ApplicationEventMulticaster applicationEventMulticaster = new DefaultApplicationEventMulticaster();
 
     @Override
     public void addBeanFactoryPostProcessor(BeanFactoryPostProcessor postProcessor) {
@@ -33,6 +35,8 @@ public abstract class AbstractApplicationContext implements ConfigurableApplicat
         PostProcessorRegistrationDelegate.invokeBeanFactoryPostProcessors(beanFactory);
         //创建仍然未完成创建的bean（内部有beanPostProcessor的运行）
         finishPreInstantiateSingletons(beanFactory);
+
+       close();
     }
 
     public abstract DefaultListableBeanFactory getBeanFactory() throws IllegalStateException;
@@ -57,6 +61,8 @@ public abstract class AbstractApplicationContext implements ConfigurableApplicat
         if(!registry.containsBeanDefinition("AutowiredAnnotationBeanProcessor")){
             registry.registerBeanDefinition("AutowiredAnnotationBeanProcessor", new AnnotatedGenericBeanDefinition(AutowiredAnnotationBeanProcessor.class));
         }
+
+        applicationEventMulticaster.addApplicationListener(new DestoryApplicationListener());
     }
 
     private void finishPreInstantiateSingletons(ConfigurableListableBeanFactory factory) {
@@ -121,5 +127,19 @@ public abstract class AbstractApplicationContext implements ConfigurableApplicat
     @Override
     public int getBeanDefinitionCount() {
         return getBeanFactory().getBeanDefinitionCount();
+    }
+
+
+    @Override
+    public void publishEvent(ApplicationEvent<?> applicationEvent) {
+        applicationEventMulticaster.multicastEvent(applicationEvent);
+    }
+
+    @Override
+    public void close() {
+        while(!ThreadPoolManager.isAvailable()){
+            publishEvent(new DestoryApplicationEvent(this));
+        }
+
     }
 }

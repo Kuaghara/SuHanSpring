@@ -4,17 +4,20 @@ import org.example.spring.annotation.Lazy;
 import org.example.spring.annotation.Scope;
 import org.example.spring.proxy.annotation.Aspect;
 
+import java.lang.annotation.Annotation;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 
 public class ScannedGenericBeanDefinition implements BeanDefinition {
+    private String className;
     private String scope = "singleton";
     private boolean lazy = false;
     private Class<?> clazz;
-    private String className;//在扫描完后名字存储的并不是名字
     private String path;
+    private List<Annotation> annotations = new ArrayList<>();
     private Map<AutoElement, Boolean> autoElementMap = new HashMap<>();//拿来存放字段以及是否被注入
     private boolean isFullConfigurationClass = false;
     private boolean singleton = true;
@@ -40,6 +43,20 @@ public class ScannedGenericBeanDefinition implements BeanDefinition {
         setPath(clazz.getPackage().getName() + "." + clazz.getSimpleName());
     }
 
+    @Override
+    public List<Annotation> getAllAnnotation() {
+        return annotations;
+    }
+
+    @Override
+    public void addOneAnnotation(Annotation annotation) {
+        annotations.add( annotation);
+    }
+
+    @Override
+    public void addAllAnnotation(List<Annotation> annotation) {
+        annotations.addAll(annotation);
+    }
 
     @Override
     public boolean isSingleton() {
@@ -121,7 +138,7 @@ public class ScannedGenericBeanDefinition implements BeanDefinition {
     }
 
     @Override
-    public boolean getFullConfigurationClass() {
+    public boolean isFullConfigurationClass() {
         return isFullConfigurationClass;
     }
 

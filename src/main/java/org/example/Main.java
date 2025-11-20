@@ -9,6 +9,7 @@ public class Main {
         //不许偷懒，尽可能地去完成所有spring的逻辑
         ApplicationContext application = new AnnotationApplicationContext(MainConfig.class);
         UserService user = (UserService) application.getBean("UserService");
+        user.testAsync();
         user.test();
 
     }

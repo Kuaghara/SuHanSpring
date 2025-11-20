@@ -57,9 +57,6 @@ public class AnnotatedGenericBeanDefinition implements BeanDefinition {
 
         setClassName(clazz.getSimpleName());
         setClazz(clazz);
-
-        //特别实现
-        addAllAnnotation(List.of(clazz.getAnnotations()));
     }
 
     @Override
@@ -136,7 +133,7 @@ public class AnnotatedGenericBeanDefinition implements BeanDefinition {
     }
 
     @Override
-    public boolean getFullConfigurationClass() {
+    public boolean isFullConfigurationClass() {
         return isFullConfigurationClass;
     }
 

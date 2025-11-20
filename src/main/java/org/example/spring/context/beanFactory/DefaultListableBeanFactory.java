@@ -111,13 +111,12 @@ public class DefaultListableBeanFactory implements ConfigurableListableBeanFacto
     }
 
     private void beanDefinitionSort(List<BeanDefinition> beanDefinitionList) {
-        ConfigurationClassParser parser = new ConfigurationClassParser(new AnnotationBeanDefinitionReader(this));
         for(int i = 0; i < beanDefinitionList.size(); i++){
             for(int j = i + 1; j < beanDefinitionList.size(); j++){
                 BeanDefinition bd1 = beanDefinitionList.get(i);
                 BeanDefinition bd2 = beanDefinitionList.get(j);
-                List<Annotation> ann1 = parser.parseAnnotation(bd1.getClazz(),new ArrayList<>());
-                List<Annotation> ann2 = parser.parseAnnotation(bd2.getClazz(),new ArrayList<>());
+                List<Annotation> ann1 = AnnotationUtil.getAnnonationsList(bd1,this);
+                List<Annotation> ann2 = AnnotationUtil.getAnnonationsList(bd2,this);
                 if(AnnotationUtil.listIncludeAnnotation(ann1, Order.class)){
                     if(AnnotationUtil.listIncludeAnnotation(ann2, Order.class)){
                         if(getOrderCount(ann1) < getOrderCount(ann2)){

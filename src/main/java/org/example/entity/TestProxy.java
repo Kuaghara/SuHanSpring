@@ -3,6 +3,7 @@ package org.example.entity;
 import org.example.spring.annotation.Component;
 import org.example.spring.proxy.annotation.Around;
 import org.example.spring.proxy.annotation.Aspect;
+import org.example.spring.proxy.annotation.Async;
 import org.example.spring.proxy.annotation.Before;
 import org.example.spring.proxy.context.ProceedingJoinPoint;
 
@@ -20,4 +21,5 @@ public class TestProxy {
     public void before() throws Throwable {
         System.out.println("before_before");
     }
+
 }

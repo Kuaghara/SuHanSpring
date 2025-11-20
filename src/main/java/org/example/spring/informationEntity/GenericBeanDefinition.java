@@ -4,6 +4,8 @@ import org.example.spring.annotation.Lazy;
 import org.example.spring.annotation.Scope;
 import org.example.spring.proxy.annotation.Aspect;
 
+import java.lang.annotation.Annotation;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -14,6 +16,7 @@ public class GenericBeanDefinition implements BeanDefinition {
     private Class<?> clazz;//bean的Class反射类
     private String scope = "singleton";//bean的作用域
     private boolean singleton = true;
+    private List<Annotation> annotations = new ArrayList<>();
     private boolean lazy = false;//bean的懒加载
     private Map<AutoElement, Boolean> autoElementMap = new HashMap<>();//拿来存放字段以及是否被注入
     private boolean isFullConfigurationClass = false;
@@ -38,6 +41,20 @@ public class GenericBeanDefinition implements BeanDefinition {
         setClazz(clazz);
     }
 
+    @Override
+    public List<Annotation> getAllAnnotation() {
+        return annotations;
+    }
+
+    @Override
+    public void addOneAnnotation(Annotation annotation) {
+        annotations.add( annotation);
+    }
+
+    @Override
+    public void addAllAnnotation(List<Annotation> annotations1) {
+        annotations.addAll( annotations1);
+    }
 
     @Override
     public boolean isSingleton() {
@@ -115,7 +132,7 @@ public class GenericBeanDefinition implements BeanDefinition {
     }
 
     @Override
-    public boolean getFullConfigurationClass() {
+    public boolean isFullConfigurationClass() {
         return this.isFullConfigurationClass;
     }
 }

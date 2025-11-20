@@ -26,9 +26,9 @@ public class ConfigurationClassParser {
 
     public void parse(BeanDefinition bd, BeanDefinitionRegistry registry) {
         Class<?> configClass = bd.getClazz();
-        //未拥有对该配置类的注解递归查找，进行添加
         //我感觉我可以这样就是递归所有注解，然后把所有注解全部放到List里，然后下面就判断List里有没有这个
         List<Annotation> annotations = parseAnnotation(configClass, new ArrayList<>());
+        bd.addAllAnnotation(annotations);
 
         //此处应该有一个对于轻/重配置类的判断
         bd.setFullConfigurationClass(isFullConfigurationClass(configClass));

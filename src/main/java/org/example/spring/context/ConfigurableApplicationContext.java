@@ -8,4 +8,5 @@ public interface ConfigurableApplicationContext extends  ApplicationContext {
     void setClassLoader(ClassLoader classLoader);
     void refresh();
     ConfigurableListableBeanFactory getBeanFactory() throws IllegalStateException;
+    void close();
 }

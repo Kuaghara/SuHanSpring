@@ -1,5 +1,6 @@
 package org.example.spring.informationEntity;
 
+import java.lang.annotation.Annotation;
 import java.util.List;
 import java.util.Map;
 
@@ -33,7 +34,10 @@ public interface BeanDefinition {
     //需要进行依赖注入的属性及其是否被注入
     Map<AutoElement, Boolean> getAutoElementMap();
 
-    boolean getFullConfigurationClass();
+    boolean isFullConfigurationClass();
 
     void setFullConfigurationClass(boolean fullConfigurationClass);
+    List<Annotation> getAllAnnotation();
+    void addOneAnnotation(Annotation annotation);
+    void addAllAnnotation(List<Annotation> annotation);
 }

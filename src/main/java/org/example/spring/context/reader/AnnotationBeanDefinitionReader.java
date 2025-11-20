@@ -80,7 +80,7 @@ public class AnnotationBeanDefinitionReader implements BeanDefinitionReader {
                 if (class1.isAnnotationPresent(Component.class)) {
                     //创建beanDefinition对象
                     try {
-                        BeanDefinition beanDefinition = new ScannedGenericBeanDefinition();
+                        BeanDefinition beanDefinition = new AnnotatedGenericBeanDefinition();
                         beanDefinition.setBeanDefinition(class1);
                         generateBeanDefinition.add(beanDefinition);
                     } catch (Exception e) {

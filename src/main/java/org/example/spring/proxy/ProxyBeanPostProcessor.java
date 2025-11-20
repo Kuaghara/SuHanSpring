@@ -30,17 +30,17 @@ public class ProxyBeanPostProcessor implements MergedBeanDefinitionPostProcessor
        return postProcessAfterInitialization(bean, name);
     }
 
-    public static void registerAdvisor(BeanDefinition bd) {
+    @Override
+    public void postProcessMergedBeanDefinition(BeanDefinition beanDefinition, Class<?> beanType, String beanName) {
+       registerAdvisor(beanDefinition);
+    }
+
+    private void registerAdvisor(BeanDefinition bd) {
         if (bd.getClazz().isAnnotationPresent(Aspect.class)) {
             //扔到Adviosr表中，等待后续动作
             AnnotationResolver annotationResolver = new AnnotationResolver();
             annotationResolver.parse(bd.getClazz());
         }
-    }
-
-    @Override
-    public void postProcessMergedBeanDefinition(BeanDefinition beanDefinition, Class<?> beanType, String beanName) {
-       registerAdvisor(beanDefinition);
     }
 
     @Deprecated

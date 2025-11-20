@@ -2,6 +2,7 @@ package org.example.spring.proxy.context;
 
 import org.example.spring.proxy.annotation.After;
 import org.example.spring.proxy.annotation.Around;
+import org.example.spring.proxy.annotation.Async;
 import org.example.spring.proxy.annotation.Before;
 
 import java.lang.reflect.InvocationTargetException;
@@ -65,6 +66,18 @@ public class AnnotationResolver {
                     throw new RuntimeException(e);
                 }
             }
+        }
+    }
+    public void parseAsync(Class<?> beanClass,Method  method){
+        try{
+            AsyncPoint asyncPoint = new AsyncPoint();
+            Object aspect = beanClass.getDeclaredConstructor().newInstance();
+            Advisor advisor = asyncPoint.getAdvisor(method,aspect);
+            advisorList.add(advisor);
+        }
+        catch (InvocationTargetException | InstantiationException | IllegalAccessException |
+               NoSuchMethodException e) {
+            throw new RuntimeException(e);
         }
     }
 }

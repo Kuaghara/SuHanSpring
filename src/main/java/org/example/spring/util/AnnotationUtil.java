@@ -1,8 +1,12 @@
 package org.example.spring.util;
 
+import org.example.spring.beanFactoryPostProcessor.ConfigurationClassParser;
+import org.example.spring.context.beanFactory.BeanDefinitionRegistry;
+import org.example.spring.context.reader.AnnotationBeanDefinitionReader;
 import org.example.spring.informationEntity.BeanDefinition;
 
 import java.lang.annotation.Annotation;
+import java.util.ArrayList;
 import java.util.List;
 
 public class AnnotationUtil {
@@ -23,4 +27,14 @@ public class AnnotationUtil {
         bdList.set(j, temp);
     }
 
+    public static List<Annotation> getAnnonationsList(BeanDefinition bd , BeanDefinitionRegistry bdr){
+        ConfigurationClassParser parser = new ConfigurationClassParser(new AnnotationBeanDefinitionReader(bdr));
+        List<Annotation> ann = new ArrayList<>();
+        if(bd.getAllAnnotation().isEmpty()){
+            ann = parser.parseAnnotation(bd.getClazz(),new ArrayList<>());
+            bd.addAllAnnotation(ann);
+        }
+        else  ann = bd.getAllAnnotation();
+        return ann;
+    }
 }

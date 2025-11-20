@@ -1,54 +1,52 @@
 package org.example.spring.proxy.context;
 
-import org.example.spring.proxy.annotation.Around;
-import org.example.spring.proxy.annotation.Async;
+import org.example.spring.context.ThreadPoolManager;
 
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.concurrent.*;
 
 public class AsyncPoint implements PointParser {
+
+    private static ExecutorService executorService = ThreadPoolManager.getThreadPool();
     @Override
-    public Advisor getAdvisor(Method method, Object Aspect) {
-        Method[] methods = Aspect.getClass().getDeclaredMethods();
-        Method asyncMethod = null;
-        for (Method m : methods) {
-            if (m.isAnnotationPresent(Async.class)) {
-                asyncMethod = m;
-            }
-        }
+    public Advisor getAdvisor(Method amethod, Object aspect) {
+        Class<?> clazz = aspect.getClass();
 
-        String path = method.getDeclaredAnnotation(Around.class).path();
-        String pathClassName = path.substring(0, path.lastIndexOf("."));
-        String pathMethodName = path.substring(path.lastIndexOf(".") + 1, path.lastIndexOf("("));
-
-        Method finalAsyncMethod = asyncMethod;
         return new Advisor() {
 
-            //9.20：
-            //此处编写并未debug,不能确保能运行
             @Override
             public Advice getAdvice() {
-                return methodInvocation -> {
-                    return new Thread(() -> {
-                        try {
-                            finalAsyncMethod.invoke(Aspect);
-                        } catch (Exception e) {
-                            e.printStackTrace();
-                        }
-                    });
+                FutureTask<Object> task = new FutureTask<>(() -> {
+                    Object invoke;
+                    try {
+                         invoke = amethod.invoke(aspect);
+                    } catch (IllegalAccessException | InvocationTargetException e) {
+                        throw new RuntimeException(e);
+                    }
+                    return invoke;
+                });
+                return new Advice() {
+                    @Override
+                    public Object invoke(MethodInvocation invocation) throws Throwable {
+                        executorService.submit(task);
+                        return null;
+                    }
                 };
             }
 
             @Override
             public Pointcut getPointcut() {
                 return new Pointcut() {
+
                     @Override
                     public boolean classFilter(Class<?> targetClass) {
-                        return pathClassName.equals(targetClass.getName());
+                        return clazz.equals(targetClass);
                     }
 
                     @Override
                     public boolean matches(Method method, Class<?> targetClass) {
-                        return pathMethodName.equals(method.getName());
+                        return amethod.equals(method);
                     }
                 };
             }
