@@ -17,15 +17,19 @@ public class AsyncPoint implements PointParser {
 
             @Override
             public Advice getAdvice() {
-                FutureTask<Object> task = new FutureTask<>(() -> {
+                Callable<Object> task = () -> {
                     Object invoke;
                     try {
                          invoke = amethod.invoke(aspect);
                     } catch (IllegalAccessException | InvocationTargetException e) {
                         throw new RuntimeException(e);
                     }
-                    return invoke;
-                });
+                    if (invoke instanceof Future<?>){
+                        return ((Future<?>) invoke).get();
+                    }
+                    return null;
+                };
+                //这里就不换lambda表达式了，以免又看不懂了
                 return new Advice() {
                     @Override
                     public Object invoke(MethodInvocation invocation) throws Throwable {

@@ -36,7 +36,7 @@ public abstract class AbstractApplicationContext implements ConfigurableApplicat
         //创建仍然未完成创建的bean（内部有beanPostProcessor的运行）
         finishPreInstantiateSingletons(beanFactory);
 
-       close();
+
     }
 
     public abstract DefaultListableBeanFactory getBeanFactory() throws IllegalStateException;
@@ -137,9 +137,6 @@ public abstract class AbstractApplicationContext implements ConfigurableApplicat
 
     @Override
     public void close() {
-        while(!ThreadPoolManager.isAvailable()){
             publishEvent(new DestoryApplicationEvent(this));
-        }
-
     }
 }

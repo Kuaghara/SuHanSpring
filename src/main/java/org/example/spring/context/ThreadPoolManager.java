@@ -6,29 +6,18 @@ import java.util.concurrent.TimeUnit;
 
 public class ThreadPoolManager {
     private static final ExecutorService executorService = Executors.newCachedThreadPool();
-    private static volatile boolean isShuttingDown = false;
 
     public static ExecutorService getThreadPool() {
         return executorService;
     }
 
     public static boolean isAvailable() {
-        return !executorService.isShutdown() && !executorService.isTerminated() && !isShuttingDown;
+        return !executorService.isShutdown() && !executorService.isTerminated();
     }
 
     public static synchronized void shutdown() {
-        if (!isShuttingDown && !executorService.isShutdown()) {
-            isShuttingDown = true;
+        if(isAvailable()){
             executorService.shutdown();
-            try {
-                // 等待最多10秒让现有任务完成
-                if (!executorService.awaitTermination(10, TimeUnit.SECONDS)) {
-                    executorService.shutdownNow();
-                }
-            } catch (InterruptedException e) {
-                executorService.shutdownNow();
-                Thread.currentThread().interrupt();
-            }
         }
     }
 
