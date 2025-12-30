@@ -13,17 +13,17 @@ public class DefaultSqlSessionFactory implements SqlSessionFactory{
     }
     @Override
     public SqlSession openSession() {
-        return openSession(true);
+        return openSession(null,true);
     }
 
     @Override
     public SqlSession openSession(boolean autoCommit) {
-        return new DefaultSqlSession(config);
+        return openSession("", autoCommit);
     }
 
     @Override
     public SqlSession openSession(Connection connection) {
-        return null;
+        return new DefaultSqlSession(config, connection);
     }
 
     @Override
@@ -32,9 +32,8 @@ public class DefaultSqlSessionFactory implements SqlSessionFactory{
     }
 
     @Override
-    public SqlSession openSession(String transactionIsolationLevel, boolean autoCommit) {
-        return null;
-    }
+    public SqlSession openSession(String transactionIsolationLevel, boolean autoCommit)
+    {return new DefaultSqlSession(config, config.getConnection(), transactionIsolationLevel, autoCommit);}
 
     @Override
     public Configuration getConfig() {

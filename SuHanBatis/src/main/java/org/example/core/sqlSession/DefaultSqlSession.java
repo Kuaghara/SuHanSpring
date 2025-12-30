@@ -5,35 +5,55 @@ import org.example.core.handle.HandlerManager;
 import org.example.core.handle.ObjectHandler;
 import org.example.core.handle.ParameterHandler;
 import org.example.core.handle.StatementHandler;
+import org.example.core.transactionFactory.JdbcTransactionFactory;
+import org.example.core.transactionFactory.Transaction;
+import org.example.core.transactionFactory.TransactionFactory;
 import org.example.mapper.Mapper;
 import org.example.mapper.MapperStatement;
 
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.List;
 import java.util.Map;
 
 
-public class DefaultSqlSession implements SqlSession{
+public class DefaultSqlSession implements SqlSession {
 
     Configuration config;
-    Connection connection ;
+    Connection connection;
+    String transactionIsolationLevel;
 
     HandlerManager handlerManager = HandlerManager.getHandlerManager();
     StatementHandler statementHandler = handlerManager.getStatementHandler();
     ObjectHandler objectHandler = handlerManager.getObjectHandler();
     ParameterHandler parameterHandler = handlerManager.getParameterHandler();
 
-    public DefaultSqlSession(Configuration config) {
+    TransactionFactory transactionFactory = new JdbcTransactionFactory();
+
+    private boolean hasUncommittedChanges = false;
+
+
+    public DefaultSqlSession(Configuration config, Connection connection) {
+        this(config, connection, "", true);
+    }
+    public DefaultSqlSession(Configuration config,Connection  connection,String transactionIsolationLevel  , boolean autoCommit) {
         this.config = config;
-        connection = config.getConnection();
+        this.connection = connection;
+        this.transactionIsolationLevel = transactionIsolationLevel;
+        try {
+            this.connection.setAutoCommit(autoCommit);
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     //把Statement对象从原来的字符串挑出来
-    private MapperStatement getStatement(String statement){
+    private MapperStatement getStatement(String statement) {
         List<Mapper> mapperList = config.getMapperList();
         MapperStatement mapperStatement = null;
-        for(Mapper mapper : mapperList){
-            if(mapperStatement != null){
+        for (Mapper mapper : mapperList) {
+            if (mapperStatement != null) {
                 throw new RuntimeException("在不同的mapper文件中存在相同id的sql语句");
             }
             mapperStatement = mapper.getMapperStatement(statement);
@@ -43,7 +63,7 @@ public class DefaultSqlSession implements SqlSession{
 
     @Override
     public <T> T selectOne(String statement) {
-        return this.selectOne(statement, (Object) null);
+        return this.selectOne(statement, null);
     }
 
     @Override
@@ -68,32 +88,32 @@ public class DefaultSqlSession implements SqlSession{
     }
 
     @Override
-    public <E> List<E> selectList(String statementStr, Object parameter)  {
+    public <E> List<E> selectList(String statementStr, Object parameter) {
         MapperStatement statementObj = getStatement(statementStr);
-        if( parameterHandler.isTypeMatch(statementObj.getParameterType(), parameter)){
+        if (parameterHandler.isTypeMatch(statementObj.getParameterType(), parameter)) {
             //执行sql语句，得到结果集
             ResultSet resultSet = statementHandler.handleSQLStatementsForSelect(statementObj.getSql(), connection, parameter);
 
             //对结果集进行反射创建对象赋值
-            return objectHandler.handleResultForList(resultSet,statementObj,config);
+            return objectHandler.handleResultForList(resultSet, statementObj, config);
         }
         return null;
     }
 
     @Override
     public <K, V> Map<K, V> selectMap(String statement, String mapKey) {
-       return selectMap(statement, null, mapKey);
+        return selectMap(statement, null, mapKey);
     }
 
     @Override
     public <K, V> Map<K, V> selectMap(String statement, Object parameter, String mapKey) {
         MapperStatement statementObj = getStatement(statement);
-        if( parameterHandler.isTypeMatch(statementObj.getParameterType(), parameter)){
+        if (parameterHandler.isTypeMatch(statementObj.getParameterType(), parameter)) {
             //执行sql语句，得到结果集
             ResultSet resultSet = statementHandler.handleSQLStatementsForSelect(statementObj.getSql(), connection, parameter);
 
             //对结果集进行反射创建对象赋值
-            return objectHandler.handleResultForMap(resultSet,statementObj,config,mapKey);
+            return objectHandler.handleResultForMap(resultSet, statementObj, config, mapKey);
         }
         return null;
     }
@@ -106,14 +126,13 @@ public class DefaultSqlSession implements SqlSession{
     @Override
     public int insert(String statement, Object parameter) {
         MapperStatement statementObj = getStatement(statement);
-        if( parameterHandler.isTypeMatch(statementObj.getParameterType(), parameter)){
-            if(statementObj.isUseGeneratedKeys()){
+        if (parameterHandler.isTypeMatch(statementObj.getParameterType(), parameter)) {
+            if (statementObj.isUseGeneratedKeys()) {
                 //执行sql语句，得到结果集
-                ResultSet resultSet = statementHandler.handleSQLStatementsForSelect(statementObj.getSql(), connection, parameter);
-
-                //对结果集进行反射创建对象赋值
-                return objectHandler.handleResultForList(resultSet,statementObj,config).size();
-            }else {
+                int l = statementHandler.handleSQLStatementsForDMLWithGeneratedKeys(statementObj, connection, parameter);
+                tager();
+                return l;
+            } else {
                 int i = statementHandler.handleSQLStatementsForDML(statementObj, connection, parameter);
                 return i;
             }
@@ -128,7 +147,8 @@ public class DefaultSqlSession implements SqlSession{
 
     @Override
     public int update(String statement, Object parameter) {
-        return 0;
+        //你妈这俩逻辑我真感觉一样的wc
+        return insert(statement, parameter);
     }
 
     @Override
@@ -138,27 +158,59 @@ public class DefaultSqlSession implements SqlSession{
 
     @Override
     public int delete(String statement, Object parameter) {
-        return 0;
+        //草，删除也是一样的逻辑，nm气笑了
+        return insert(statement, parameter);
     }
 
     @Override
     public void commit() {
+        Transaction transaction = transactionFactory.newTransaction(connection);
 
+        try {
+            if(!hasUncommittedChanges){
+                return;
+            }
+            transaction.commit();
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Override
     public void commit(boolean force) {
+        Transaction transaction = transactionFactory.newTransaction(connection);
+        try {
+            transaction.commit();
+        }
+        catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
 
     }
 
     @Override
     public void rollback() {
-
+        Transaction transaction = transactionFactory.newTransaction(connection);
+        try {
+            if (hasUncommittedChanges){
+                return;
+            }
+            transaction.rollback();
+        }
+        catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Override
     public void rollback(boolean force) {
-
+        Transaction transaction = transactionFactory.newTransaction(connection);
+        try {
+            transaction.rollback();
+        }
+        catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Override
@@ -168,17 +220,22 @@ public class DefaultSqlSession implements SqlSession{
 
     @Override
     public void close() {
-
+        Transaction transaction = transactionFactory.newTransaction(connection);
+        try {
+            transaction.close();
+        }
+        catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Override
     public void clearCache() {
-
     }
 
     @Override
     public Configuration getConfiguration() {
-        return null;
+        return config;
     }
 
     @Override
@@ -188,6 +245,15 @@ public class DefaultSqlSession implements SqlSession{
 
     @Override
     public Connection getConnection() {
-        return null;
+        return connection;
+    }
+    private void tager(){
+        try {
+            if(!connection.getAutoCommit()){
+                hasUncommittedChanges = true;
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
     }
 }

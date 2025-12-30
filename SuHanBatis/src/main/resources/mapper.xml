@@ -13,9 +13,16 @@
         select * from users where username = #{username}
     </select>
 
-    <insert id="testMap"  >
-        insert into users(id,username,password) values(#{id},#{username},#{password})
+    <insert id="testMap" >
+        insert into users(username,password) values(#{username},#{password})
     </insert>
+
+    <update id="update1" parameterType="org.example.entity.User" useGeneratedKeys="true" keyColumn="id" keyProperty="id">
+        update users set username=#{username},password=#{password} where id=#{id}
+    </update>
+    <delete id="delete1" parameterType="org.example.entity.User">
+        delete from users where id=#{id}
+    </delete>
 
 
     <!--此处及下方的查找语句无法使用，仅供编写参考-->

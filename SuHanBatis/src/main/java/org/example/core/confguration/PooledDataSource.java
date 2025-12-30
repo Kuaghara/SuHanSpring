@@ -15,15 +15,16 @@ public class PooledDataSource implements DataSource {
     String url;
     String username;
     String password;
-    ThreadPoolExecutor executor = new ThreadPoolExecutor(
-            5,  //核心线程5
-            20,            //最大线程20
-            10L,           //线程空闲时间10秒
-            TimeUnit.SECONDS,  //时间单位
-            new LinkedBlockingQueue<>(100), //任务队列为阻塞队列
-            Executors.defaultThreadFactory(),      //线程工厂
-            new ThreadPoolExecutor.CallerRunsPolicy()   //拒绝策略
-    );
+    /// ai误人啊家人们
+//    ThreadPoolExecutor executor = new ThreadPoolExecutor(
+//            5,  //核心线程5
+//            20,            //最大线程20
+//            10L,           //线程空闲时间10秒
+//            TimeUnit.SECONDS,  //时间单位
+//            new LinkedBlockingQueue<>(100), //任务队列为阻塞队列
+//            Executors.defaultThreadFactory(),      //线程工厂
+//            new ThreadPoolExecutor.CallerRunsPolicy()   //拒绝策略
+//    );
 
     public PooledDataSource(){
 

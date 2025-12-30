@@ -19,13 +19,17 @@ public class Main {
     public static void main(String[] args) throws FileNotFoundException {
         SqlSessionFactory sqlSessionFactory = new SqlSessionFactoryBuilder().build(new FileInputStream("SuHanBatis/src/main/resources/mybatis-config.xml"));
 
-        try(SqlSession sqlSession = sqlSessionFactory.openSession(true)){
+        try(SqlSession sqlSession = sqlSessionFactory.openSession(false)){
             User user = new User();
-            user.setId(10);
-            user.setUsername("SuHan");
+            user.setUsername("张三");
             user.setPassword("123456");
             int testMap = sqlSession.insert("testMap", user);
+            sqlSession.rollback();
+            int testMap2 = sqlSession.insert("testMap", user);
+            sqlSession.commit(true);
+
             System.out.println(testMap);
+            System.out.println(testMap2);
         }
     }
 

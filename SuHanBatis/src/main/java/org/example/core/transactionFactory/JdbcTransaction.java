@@ -26,11 +26,11 @@ public class JdbcTransaction implements Transaction{
 
     @Override
     public void close() throws SQLException {
-        connection.rollback();
+        connection.close();
     }
 
     @Override
     public Integer getTimeout() throws SQLException {
-        return 0;
+        return connection.getNetworkTimeout();
     }
 }
