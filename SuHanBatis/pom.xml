@@ -9,11 +9,7 @@
         <version>1.0-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
-    <groupId>org.example</groupId>
-    <version>1.0-SNAPSHOT</version>
 
-
-    <!--此处为SuHanBatis的maven的xml配置文件-->
 
     <artifactId>SuHanBatis</artifactId>
     <dependencies>
