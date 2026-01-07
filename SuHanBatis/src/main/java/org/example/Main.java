@@ -6,6 +6,7 @@ import org.example.core.confguration.XmlConfigBuilder;
 import org.example.core.sqlSession.SqlSession;
 import org.example.core.sqlSession.SqlSessionFactory;
 import org.example.core.sqlSession.SqlSessionFactoryBuilder;
+import org.example.entity.TestMapper;
 import org.example.entity.User;
 
 import java.io.File;
@@ -20,16 +21,10 @@ public class Main {
         SqlSessionFactory sqlSessionFactory = new SqlSessionFactoryBuilder().build(new FileInputStream("SuHanBatis/src/main/resources/mybatis-config.xml"));
 
         try(SqlSession sqlSession = sqlSessionFactory.openSession(false)){
-            User user = new User();
-            user.setUsername("张三");
-            user.setPassword("123456");
-            int testMap = sqlSession.insert("testMap", user);
-            sqlSession.rollback();
-            int testMap2 = sqlSession.insert("testMap", user);
-            sqlSession.commit(true);
+            TestMapper mapper = sqlSession.getMapper(TestMapper.class);
+            User user = mapper.getUserById(1);
+            System.out.println(user);
 
-            System.out.println(testMap);
-            System.out.println(testMap2);
         }
     }
 

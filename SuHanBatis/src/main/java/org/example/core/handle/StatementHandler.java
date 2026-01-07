@@ -1,7 +1,7 @@
 package org.example.core.handle;
 
 import org.example.core.confguration.XmlStatementBuilder;
-import org.example.mapper.MapperStatement;
+import org.example.core.mapper.MapperStatement;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;

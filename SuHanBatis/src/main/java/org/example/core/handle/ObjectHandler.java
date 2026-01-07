@@ -3,9 +3,9 @@ package org.example.core.handle;
 import org.example.core.confguration.AliasRegistry;
 import org.example.core.confguration.Configuration;
 import org.example.core.confguration.XmlMapperBuilder;
-import org.example.mapper.Mapper;
-import org.example.mapper.MapperStatement;
-import org.example.mapper.ResultMap;
+import org.example.core.mapper.Mapper;
+import org.example.core.mapper.MapperStatement;
+import org.example.core.mapper.ResultMap;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
@@ -153,7 +153,8 @@ public class ObjectHandler {
 
                         if (propertyName.equals(columnName)) {
                             field.setAccessible(true);
-                            Object value = xmlMapperBuilder.convertType(columnObj,field.getClass());
+                            Class<?> targetType = field.getType();
+                            Object value = xmlMapperBuilder.convertType(columnObj, targetType);
                             field.set(bean, value);
                         }
                     }
@@ -185,7 +186,8 @@ public class ObjectHandler {
                             throw new RuntimeException("实体类中主键属性名与xml中属性名不一致");
                         }
                         field.setAccessible(true);
-                        Object value = xmlMapperBuilder.convertType(columnObj,field.getClass());
+                        Class<?> targetType = field.getType();
+                        Object value = xmlMapperBuilder.convertType(columnObj, targetType);
                         field.set(bean, value);
                         idIsFound = true;
                     }
@@ -195,7 +197,8 @@ public class ObjectHandler {
                             throw new RuntimeException("实体类中属性名与xml中属性名不一致");
                         }
                         field.setAccessible(true);
-                        Object value = xmlMapperBuilder.convertType(columnObj,field.getClass());
+                        Class<?> targetType = field.getType();
+                        Object value = xmlMapperBuilder.convertType(columnObj, targetType);
                         field.set(bean, value);
                     }
                 }

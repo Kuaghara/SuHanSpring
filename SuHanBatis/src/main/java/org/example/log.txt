@@ -33,5 +33,11 @@
 12.26 deadline
     我咋还没似啊
 12.27 deadline后的第一天
-    昨天写完了instert，今天又完善了了主键，然后又写完了个update
-    nm,insert,delect,updata一摸一样的逻辑是吧（
+    昨天写完了insert，今天又完善了了主键，然后又写完了个update
+    nm,insert,delect,update一摸一样的逻辑是吧（
+12.30
+    昨天我生日~
+    不过这次过阴历的，考完光速回家
+    今天完成了事务，师傅说算是收工了
+
+

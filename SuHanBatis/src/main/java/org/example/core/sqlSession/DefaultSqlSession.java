@@ -1,16 +1,14 @@
 package org.example.core.sqlSession;
 
 import org.example.core.confguration.Configuration;
-import org.example.core.handle.HandlerManager;
-import org.example.core.handle.ObjectHandler;
-import org.example.core.handle.ParameterHandler;
-import org.example.core.handle.StatementHandler;
+import org.example.core.handle.*;
 import org.example.core.transactionFactory.JdbcTransactionFactory;
 import org.example.core.transactionFactory.Transaction;
 import org.example.core.transactionFactory.TransactionFactory;
-import org.example.mapper.Mapper;
-import org.example.mapper.MapperStatement;
+import org.example.core.mapper.Mapper;
+import org.example.core.mapper.MapperStatement;
 
+import java.lang.reflect.Proxy;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -28,6 +26,7 @@ public class DefaultSqlSession implements SqlSession {
     StatementHandler statementHandler = handlerManager.getStatementHandler();
     ObjectHandler objectHandler = handlerManager.getObjectHandler();
     ParameterHandler parameterHandler = handlerManager.getParameterHandler();
+    MapperHandler mapperHandler = handlerManager.getMapperHandler();
 
     TransactionFactory transactionFactory = new JdbcTransactionFactory();
 
@@ -46,6 +45,7 @@ public class DefaultSqlSession implements SqlSession {
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
+        this.mapperHandler.setConfig( config);
     }
 
     //把Statement对象从原来的字符串挑出来
@@ -240,6 +240,13 @@ public class DefaultSqlSession implements SqlSession {
 
     @Override
     public <T> T getMapper(Class<T> type) {
+        if(type.isInterface()){
+            List<String> mapperPathList = config.getMapperPathList();
+            for(String mapperPath : mapperPathList) {
+                    //判断为接口的同时判断是否为相同
+                    return (T) Proxy.newProxyInstance(type.getClassLoader(), new Class[]{type}, mapperHandler);
+            }
+        }
         return null;
     }
 

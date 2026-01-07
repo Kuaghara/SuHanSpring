@@ -1,5 +1,11 @@
 package org.example.core.handle;
 
+import org.example.core.annotations.Param;
+
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Method;
+import java.lang.reflect.Parameter;
+import java.util.HashMap;
 import java.util.Map;
 
 public class ParameterHandler {
@@ -46,5 +52,20 @@ public class ParameterHandler {
         } catch (ClassNotFoundException e) {
             throw new RuntimeException(e+"查找类型时错误");
         }
+    }
+
+    //新写一个方法，用于拆分@Parma注解变成map传入
+    public Map<String , Object> readTheShapeParameter(Method method ,Object[] args){
+        Map<String , Object> map = new HashMap<>();
+        Parameter [] parameters = method.getParameters();
+        int i = 0;
+        for(Parameter parameter : parameters){
+            Annotation annotation = parameter.getAnnotation(Param.class);
+            if(annotation != null){
+                String key = ((Param) annotation).value();
+                map.put(key, args[i++]);
+            }
+        }
+        return map;
     }
 }

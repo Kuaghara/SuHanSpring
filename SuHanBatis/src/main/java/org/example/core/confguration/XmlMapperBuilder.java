@@ -1,11 +1,9 @@
 package org.example.core.confguration;
 
-import org.example.mapper.Mapper;
+import org.example.core.mapper.Mapper;
 
-import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.net.URL;
 
 public class XmlMapperBuilder extends BaseBuilder{
 

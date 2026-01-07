@@ -1,6 +1,6 @@
 package org.example.core.confguration;
 
-import org.example.mapper.Mapper;
+import org.example.core.mapper.Mapper;
 
 import java.sql.Connection;
 import java.util.ArrayList;

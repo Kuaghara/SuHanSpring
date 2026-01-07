@@ -5,6 +5,7 @@ public class HandlerManager {
     private static ObjectHandler objectHandler = new ObjectHandler();
     private static ParameterHandler parameterHandler = new ParameterHandler();
     private static StatementHandler statementHandler = new StatementHandler();
+    private static MapperHandler  mapperHandler = new MapperHandler();
 
     private HandlerManager(){}
 
@@ -22,5 +23,9 @@ public class HandlerManager {
 
     public StatementHandler getStatementHandler() {
         return statementHandler;
+    }
+
+     public MapperHandler getMapperHandler() {
+        return mapperHandler;
     }
 }

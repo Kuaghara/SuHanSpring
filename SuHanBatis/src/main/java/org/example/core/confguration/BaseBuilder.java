@@ -1,8 +1,8 @@
 package org.example.core.confguration;
 
-import org.example.mapper.Mapper;
-import org.example.mapper.MapperStatement;
-import org.example.mapper.ResultMap;
+import org.example.core.mapper.Mapper;
+import org.example.core.mapper.MapperStatement;
+import org.example.core.mapper.ResultMap;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
