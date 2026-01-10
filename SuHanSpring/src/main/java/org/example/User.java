@@ -1,7 +1,7 @@
 package org.example;
 
 import org.example.entity.CircularDependency_Test;
-import org.example.spring.annotation.Autowired;
+import org.example.core.annotation.Autowired;
 
 public class User {
     private String name;

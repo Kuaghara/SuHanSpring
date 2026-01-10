@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+
+<mapper namespace="org.example.entity.testMapper">
+    <select id="selectAllUsers">
+        select * from users
+    </select>
+    <select id="getUserById" parameterType="_int" resultType="org.example.entity.User">
+        select * from users where id = #{id}
+    </select>
+
+    <select id="getUserByUsername" parameterType="String" resultMap="test">
+        select * from users where username = #{username}
+    </select>
+
+    <insert id="testMap" >
+        insert into users(username,password) values(#{username},#{password})
+    </insert>
+
+    <update id="update1" parameterType="org.example.entity.User" useGeneratedKeys="true" keyColumn="id" keyProperty="id">
+        update users set username=#{username},password=#{password} where id=#{id}
+    </update>
+    <delete id="delete1" parameterType="org.example.entity.User">
+        delete from users where id=#{id}
+    </delete>
+
+
+    <!--此处及下方的查找语句无法使用，仅供编写参考-->
+    <select id="testMap1" resultMap="test2" >
+        select * from users where id=1
+    </select>
+
+    <resultMap id="test2" type="org.example.entity.People">
+        <id property="p_id" column="id"/>
+        <result property="p_name" column="username"/>
+        <result property="p_password" column="password"/>
+    </resultMap>
+</mapper>

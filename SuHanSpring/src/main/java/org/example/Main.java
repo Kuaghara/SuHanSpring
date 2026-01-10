@@ -1,8 +1,8 @@
 package org.example;
 
 import org.example.entity.UserService;
-import org.example.spring.context.AnnotationApplicationContext;
-import org.example.spring.context.ApplicationContext;
+import org.example.core.context.AnnotationApplicationContext;
+import org.example.core.context.ApplicationContext;
 
 public class Main {
     public static void main(String[] args) {

@@ -1,11 +1,10 @@
 package org.example;
 
-import org.example.spring.annotation.Bean;
-import org.example.spring.annotation.ComponentScan;
-import org.example.spring.annotation.Configuration;
-import org.example.spring.proxy.annotation.Async;
-import org.example.spring.proxy.annotation.EnableAspectJAutoProxy;
-import org.example.spring.proxy.annotation.EnableAsync;
+import org.example.core.annotation.Bean;
+import org.example.core.annotation.ComponentScan;
+import org.example.core.annotation.Configuration;
+import org.example.core.proxy.annotation.EnableAspectJAutoProxy;
+import org.example.core.proxy.annotation.EnableAsync;
 
 @EnableAsync
 @EnableAspectJAutoProxy

@@ -1,20 +1,14 @@
 package org.example;
 
 
-import org.example.core.confguration.BaseBuilder;
-import org.example.core.confguration.XmlConfigBuilder;
-import org.example.core.sqlSession.SqlSession;
-import org.example.core.sqlSession.SqlSessionFactory;
-import org.example.core.sqlSession.SqlSessionFactoryBuilder;
+import org.example.core.sqlsession.SqlSession;
+import org.example.core.sqlsession.SqlSessionFactory;
+import org.example.core.sqlsession.SqlSessionFactoryBuilder;
 import org.example.entity.TestMapper;
 import org.example.entity.User;
 
-import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.net.URL;
-import java.util.Map;
-import java.util.Objects;
 
 public class Main {
     public static void main(String[] args) throws FileNotFoundException {

@@ -1,8 +1,7 @@
 package org.example.entity;
 
-import org.example.User;
-import org.example.spring.annotation.Autowired;
-import org.example.spring.annotation.Component;
+import org.example.core.annotation.Autowired;
+import org.example.core.annotation.Component;
 
 @Component
 public class CircularDependency_Test {

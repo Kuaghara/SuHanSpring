@@ -1,11 +1,10 @@
 package org.example.entity;
 
-import org.example.spring.annotation.Component;
-import org.example.spring.proxy.annotation.Around;
-import org.example.spring.proxy.annotation.Aspect;
-import org.example.spring.proxy.annotation.Async;
-import org.example.spring.proxy.annotation.Before;
-import org.example.spring.proxy.context.ProceedingJoinPoint;
+import org.example.core.annotation.Component;
+import org.example.core.proxy.annotation.Around;
+import org.example.core.proxy.annotation.Aspect;
+import org.example.core.proxy.annotation.Before;
+import org.example.core.proxy.context.ProceedingJoinPoint;
 
 @Component
 @Aspect
