@@ -18,7 +18,7 @@ public class SpringConfig {
 
     @Bean
     public SqlSessionTemplate sqlSessionTemplate() throws FileNotFoundException {
-        SqlSessionFactory sqlSessionFactory = new SqlSessionFactoryBuilder().build(new FileInputStream("BatisAdaptationForSpring/src/main/java/org/example/config/mybatis-config.xml"));
+        SqlSessionFactory sqlSessionFactory = new SqlSessionFactoryBuilder().build(new FileInputStream("BatisAdaptationForSpring/src/main/java/org/example/config/Mybatis-config.xml"));
         return new SqlSessionTemplate(sqlSessionFactory);
     }
 }

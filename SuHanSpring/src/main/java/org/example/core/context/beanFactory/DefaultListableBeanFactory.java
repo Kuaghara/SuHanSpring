@@ -74,6 +74,10 @@ public class DefaultListableBeanFactory implements ConfigurableListableBeanFacto
 
     @Override
     public Object getBean(String beanName) {
+        Object singleton = getSingleton(beanName);
+        if (singleton != null) {
+            return singleton;
+        }
         if (!beanDefinitionMap.containsKey(beanName)) {
             throw new RuntimeException(beanName + "不存在");
         }

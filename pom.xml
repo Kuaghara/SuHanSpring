@@ -12,6 +12,7 @@
         <module>SuHanBatis</module>
         <module>SuHanSpring</module>
         <module>BatisAdaptationForSpring</module>
+        <module>SuHanMVC</module>
     </modules>
 
     <properties>

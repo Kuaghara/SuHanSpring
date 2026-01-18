@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>JSON 测试页面</title>
+</head>
+<body>
+    <h1>JSON 数据测试</h1>
+
+    <div>
+        <button onclick="sendTestJson()">发送测试 JSON 数据</button>
+    </div>
+
+    <div id="result" style="margin-top: 20px; padding: 10px; border: 1px solid #ddd;"></div>
+
+    <script>
+        function sendTestJson() {
+            const testData = {
+                id: 1,
+                name: "张三",
+                email: "zhangsan@example.com"
+            };
+
+            // 修改为正确的端口 8081
+            fetch('http://localhost:8080/user', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(testData)
+            })
+            .then(response => {
+                if (response.ok) {
+                    return response.json();
+                } else {
+                    throw new Error('HTTP ' + response.status);
+                }
+            })
+            .then(data => {
+                document.getElementById('result').innerHTML =
+                    '<p style="color: green;">成功接收响应:</p>' +
+                    '<pre>' + JSON.stringify(data, null, 2) + '</pre>';
+            })
+            .catch(error => {
+                document.getElementById('result').innerHTML =
+                    '<p style="color: red;">请求失败: ' + error.message + '</p>';
+            });
+        }
+    </script>
+</body>
+</html>

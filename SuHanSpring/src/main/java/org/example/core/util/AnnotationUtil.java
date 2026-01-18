@@ -8,6 +8,9 @@ import org.example.core.context.reader.AnnotationBeanDefinitionReader;
 import org.example.core.informationEntity.BeanDefinition;
 
 import java.lang.annotation.Annotation;
+import java.lang.annotation.Documented;
+import java.lang.annotation.Retention;
+import java.lang.annotation.Target;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -71,6 +74,32 @@ public class AnnotationUtil {
             }
         }
         return 0;
+    }
+    public static List<Annotation> getAnnotationsList(Class<?> clazz, List<Annotation> annotationList) {
+        List<Annotation> annotations = new ArrayList<>(List.of(clazz.getDeclaredAnnotations()));
+        
+        // 如果是元注解（只有Target、Retention、Documented），直接返回
+        if (clazz.getAnnotations().length == 3 && 
+            listIncludeAnnotation(annotations, Target.class) && 
+            listIncludeAnnotation(annotations, Retention.class) && 
+            listIncludeAnnotation(annotations, Documented.class)) {
+            return annotations;
+        }
+        
+        for (Annotation annotation : clazz.getAnnotations()) {
+            if (annotation instanceof Target || annotation instanceof Retention || annotation instanceof Documented) {
+                continue;
+            }
+            
+            if (!annotations.contains(annotation)) {
+                annotations.add(annotation);
+                // 递归获取注解的注解，并合并结果
+                List<Annotation> nestedAnnotations = getAnnotationsList(annotation.annotationType(), new ArrayList<>());
+                annotations.addAll(nestedAnnotations);
+            }
+        }
+        
+        return annotations;
     }
 }
 

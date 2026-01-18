@@ -6,8 +6,10 @@ import org.example.core.annotation.ComponentScan;
 import org.example.core.context.beanFactory.BeanDefinitionRegistry;
 import org.example.core.informationEntity.AnnotatedGenericBeanDefinition;
 import org.example.core.informationEntity.BeanDefinition;
+import org.example.core.util.AnnotationUtil;
 
 import java.io.File;
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.net.URL;
 import java.util.ArrayList;
@@ -74,11 +76,13 @@ public class AnnotationBeanDefinitionReader implements BeanDefinitionReader {
                     throw new RuntimeException(e);
                 }
 
-                if (class1.isAnnotationPresent(Component.class)) {
-                    //创建beanDefinition对象
+                BeanDefinition beanDefinition = new AnnotatedGenericBeanDefinition();
+                beanDefinition.setBeanDefinition(class1);
+
+                List<Annotation> annonationsList = AnnotationUtil.getAnnonationsList(beanDefinition, beanDefinitionRegistry);
+
+                if (AnnotationUtil.listIncludeAnnotation(annonationsList, Component.class)) {
                     try {
-                        BeanDefinition beanDefinition = new AnnotatedGenericBeanDefinition();
-                        beanDefinition.setBeanDefinition(class1);
                         generateBeanDefinition.add(beanDefinition);
                     } catch (Exception e) {
                         throw new RuntimeException("发现了两个重复的bean：" + class1);
