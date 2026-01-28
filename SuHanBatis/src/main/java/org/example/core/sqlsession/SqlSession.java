@@ -34,7 +34,7 @@ public interface SqlSession extends AutoCloseable {
 
     //void select(String statement, ResultHandler handler);
 
-   // void select(String statement, Object parameter, RowBounds rowBounds, ResultHandler handler);
+    // void select(String statement, Object parameter, RowBounds rowBounds, ResultHandler handler);
 
     int insert(String statement);
 
@@ -67,7 +67,6 @@ public interface SqlSession extends AutoCloseable {
     <T> T getMapper(Class<T> type);
 
     Connection getConnection();
-
 
 
 }

@@ -5,7 +5,9 @@ import java.lang.annotation.RetentionPolicy;
 
 @Retention(RetentionPolicy.RUNTIME)
 public @interface RequestParam {
-    String value() ;
+    String value();
+
     boolean required() default true;
+
     String defaultValue() default "";
 }

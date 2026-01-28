@@ -13,9 +13,9 @@ public class HelloController {
 
     @ResponseBody
     @RequestMapping(path = "/hello", method = RequestMethod.GET)
-    public ModelAndView hello(){
+    public ModelAndView hello() {
         ModelAndView modelAndView = new ModelAndView("hello");
-        modelAndView.addJsonMessage("Message" , "Hello World");
-        return modelAndView ;
+        modelAndView.addJsonMessage("Message", "Hello World");
+        return modelAndView;
     }
 }

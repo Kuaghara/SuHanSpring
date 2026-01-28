@@ -11,10 +11,10 @@ import java.util.List;
 import java.util.Map;
 
 public class MapperHandler implements InvocationHandler {
-    Configuration config;
     private final StatementHandler statementHandler = HandlerManager.getHandlerManager().getStatementHandler();
     private final ParameterHandler parameterHandler = HandlerManager.getHandlerManager().getParameterHandler();
     private final ObjectHandler objectHandler = HandlerManager.getHandlerManager().getObjectHandler();
+    Configuration config;
 
     public MapperHandler setConfig(Configuration config) {
         this.config = config;
@@ -63,7 +63,7 @@ public class MapperHandler implements InvocationHandler {
     public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
         String methodName = method.getName();
         List<Mapper> mapperList = config.getMapperList();
-        for(Mapper mapper : mapperList) {
+        for (Mapper mapper : mapperList) {
             MapperStatement ms = mapper.getMapperStatement(methodName);
 
             if (ms == null) {
@@ -77,10 +77,9 @@ public class MapperHandler implements InvocationHandler {
                 ResultSet resultSet = statementHandler.handleSQLStatementsForSelect(ms.getSql(), config.getConnection(), parameterMap);
                 //对结果集进行反射创建对象赋值
                 List<Object> objects = objectHandler.handleResultForList(resultSet, ms, config);
-                if(objects.size() != 1){
+                if (objects.size() != 1) {
                     return objects;
-                }
-                else return objects.get(0);
+                } else return objects.get(0);
             } else {
                 if (ms.isUseGeneratedKeys()) {
                     //执行sql语句，得到结果集
@@ -91,7 +90,8 @@ public class MapperHandler implements InvocationHandler {
                     return i;
                 }
             }
-        };
+        }
+        ;
         return null;
     }
 }

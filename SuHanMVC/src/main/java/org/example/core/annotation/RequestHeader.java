@@ -6,6 +6,8 @@ import java.lang.annotation.RetentionPolicy;
 @Retention(RetentionPolicy.RUNTIME)
 public @interface RequestHeader {
     String value();
+
     String defaultValue() default "";
+
     boolean required() default true;
 }

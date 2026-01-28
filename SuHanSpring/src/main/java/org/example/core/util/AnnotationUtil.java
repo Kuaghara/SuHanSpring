@@ -11,86 +11,119 @@ import java.lang.annotation.Annotation;
 import java.lang.annotation.Documented;
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 
 public class AnnotationUtil {
 
     //确认List中有无该注解的实例
-    public static Boolean listIncludeAnnotation(List<Annotation> annotations , Class<? extends Annotation> annotation){
-        for(Annotation ann : annotations){
-            if(annotation.isInstance( ann)){
+    public static Boolean listIncludeAnnotation(List<Annotation> annotations, Class<? extends Annotation> annotation) {
+        for (Annotation ann : annotations) {
+            if (annotation.isInstance(ann)) {
                 return true;
             }
         }
         return false;
     }
 
-    public static void ChangeLocation(List<BeanDefinition> bdList,int i ,int j){
+    public static void ChangeLocation(List<BeanDefinition> bdList, int i, int j) {
         BeanDefinition temp = bdList.get(i);
-        bdList.set(i, bdList.get( j));
+        bdList.set(i, bdList.get(j));
         bdList.set(j, temp);
     }
 
-    public static List<Annotation> getAnnonationsList(BeanDefinition bd , BeanDefinitionRegistry bdr){
-        ConfigurationClassParser parser = new ConfigurationClassParser(new AnnotationBeanDefinitionReader(bdr));
+    //以前写的咋要bdr啊？yysy耦合性挺高的
+
+    public static List<Annotation> getAnnonationsList(BeanDefinition bd) {
         List<Annotation> ann;
-        if(bd.getAllAnnotation().isEmpty()){
-            ann = parser.parseAnnotation(bd.getClazz(),new ArrayList<>());
+        if (bd.getAllAnnotation().isEmpty()) {
+            ann = AnnotationUtil.getAnnotationsList(bd.getClazz(), new ArrayList<>());
             bd.addAllAnnotation(ann);
-        }
-        else  ann = bd.getAllAnnotation();
+        } else ann = bd.getAllAnnotation();
         return ann;
     }
-    public static  Boolean isConfigurationClass(Class<?> clazz){
-        return clazz.isAnnotationPresent(Configuration.class);
+
+    public static Boolean isConfigurationClass(Class<?> clazz) {
+        List<Annotation> ann = AnnotationUtil.getAnnotationsList(clazz , new ArrayList<>());
+        if(ann != null && listIncludeAnnotation(ann, Configuration.class)){
+            return true;
+        }
+        return false;
     }
-    public static void beanDefinitionSort(List<BeanDefinition> beanDefinitionList , BeanDefinitionRegistry bdr) {
-        for(int i = 0; i < beanDefinitionList.size(); i++){
-            for(int j = i + 1; j < beanDefinitionList.size(); j++){
+
+    public static void beanDefinitionSort(List<BeanDefinition> beanDefinitionList, BeanDefinitionRegistry bdr) {
+        for (int i = 0; i < beanDefinitionList.size(); i++) {
+            for (int j = i + 1; j < beanDefinitionList.size(); j++) {
                 BeanDefinition bd1 = beanDefinitionList.get(i);
                 BeanDefinition bd2 = beanDefinitionList.get(j);
-                List<Annotation> ann1 = AnnotationUtil.getAnnonationsList(bd1,bdr);
-                List<Annotation> ann2 = AnnotationUtil.getAnnonationsList(bd2,bdr);
-                if(AnnotationUtil.listIncludeAnnotation(ann1, Order.class)){
-                    if(AnnotationUtil.listIncludeAnnotation(ann2, Order.class)){
-                        if(getOrderCount(ann1) < getOrderCount(ann2)){
+                List<Annotation> ann1 = AnnotationUtil.getAnnonationsList(bd1);
+                List<Annotation> ann2 = AnnotationUtil.getAnnonationsList(bd2);
+                if (AnnotationUtil.listIncludeAnnotation(ann1, Order.class)) {
+                    if (AnnotationUtil.listIncludeAnnotation(ann2, Order.class)) {
+                        if (getOrderCount(ann1) < getOrderCount(ann2)) {
                             AnnotationUtil.ChangeLocation(beanDefinitionList, i, j);
                         }
                     }
-                }
-                else {
-                    if (AnnotationUtil.listIncludeAnnotation(ann2, Order.class)){
+                } else {
+                    if (AnnotationUtil.listIncludeAnnotation(ann2, Order.class)) {
                         AnnotationUtil.ChangeLocation(beanDefinitionList, i, j);
                     }
                 }
             }
         }
     }
-    private static int getOrderCount(List<Annotation> a1){
-        for(Annotation ann : a1){
-            if(ann instanceof Order){
+
+    private static int getOrderCount(List<Annotation> a1) {
+        for (Annotation ann : a1) {
+            if (ann instanceof Order) {
                 return ((Order) ann).value();
             }
         }
         return 0;
     }
-    public static List<Annotation> getAnnotationsList(Class<?> clazz, List<Annotation> annotationList) {
-        List<Annotation> annotations = new ArrayList<>(List.of(clazz.getDeclaredAnnotations()));
-        
+
+    //这个是新写的，更泛用
+    public static List<Annotation> getAnnotationsList(Class<?> clazz, List<Annotation> annotations) {
+
         // 如果是元注解（只有Target、Retention、Documented），直接返回
-        if (clazz.getAnnotations().length == 3 && 
-            listIncludeAnnotation(annotations, Target.class) && 
-            listIncludeAnnotation(annotations, Retention.class) && 
-            listIncludeAnnotation(annotations, Documented.class)) {
+        if (clazz.getAnnotations().length == 3 &&
+                listIncludeAnnotation(annotations, Target.class) &&
+                listIncludeAnnotation(annotations, Retention.class) &&
+                listIncludeAnnotation(annotations, Documented.class)) {
             return annotations;
         }
-        
+
         for (Annotation annotation : clazz.getAnnotations()) {
             if (annotation instanceof Target || annotation instanceof Retention || annotation instanceof Documented) {
                 continue;
             }
-            
+
+            if (!annotations.contains(annotation)) {
+                annotations.add(annotation);
+                // 递归获取注解的注解，并合并结果
+                annotations = getAnnotationsList(annotation.annotationType(), annotations);
+            }
+        }
+        return annotations;
+    }
+
+    public static List<Annotation> getAnnotationsList(Method method) {
+        List<Annotation> annotations = new ArrayList<>(List.of(method.getDeclaredAnnotations()));
+
+        // 如果是元注解（只有Target、Retention、Documented），直接返回
+        if (method.getAnnotations().length == 3 &&
+                listIncludeAnnotation(annotations, Target.class) &&
+                listIncludeAnnotation(annotations, Retention.class) &&
+                listIncludeAnnotation(annotations, Documented.class)) {
+            return annotations;
+        }
+
+        for (Annotation annotation : method.getAnnotations()) {
+            if (annotation instanceof Target || annotation instanceof Retention || annotation instanceof Documented) {
+                continue;
+            }
+
             if (!annotations.contains(annotation)) {
                 annotations.add(annotation);
                 // 递归获取注解的注解，并合并结果
@@ -98,8 +131,28 @@ public class AnnotationUtil {
                 annotations.addAll(nestedAnnotations);
             }
         }
-        
+
         return annotations;
     }
+
+    public static <T extends Annotation> T getAnnotationFromList(List<Annotation> annotations, Class<? extends Annotation> annotationClass) {
+        for (Annotation annotation : annotations) {
+            if (annotationClass.isInstance(annotation)) {
+                return (T) annotation;
+            }
+        }
+        return null;
+    }
+
+    public static <T extends Annotation> List<T> getTargetAnnotations(List<Annotation> annotations ,Class<? extends Annotation> annotationClass){
+       List<T> targetAnnotations = new ArrayList<>();
+       for(Annotation annotation : annotations){
+           if(annotationClass.isInstance(annotation)){
+               targetAnnotations.add((T)annotation);
+           }
+       }
+       return targetAnnotations;
+    }
+
 }
 

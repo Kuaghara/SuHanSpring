@@ -5,7 +5,6 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 
 
-
 public class JdkProxyFactory implements ProxyFactory, InvocationHandler {
     private final Object target;
 

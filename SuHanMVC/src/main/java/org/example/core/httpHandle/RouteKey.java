@@ -12,14 +12,6 @@ public class RouteKey {
         this.requestPath = normalizePath(requestPath);
     }
 
-    public String getRequestMethod() {
-        return requestMethod;
-    }
-
-    public String getRequestPath() {
-        return requestPath;
-    }
-
     private static String normalizeMethod(String method) {
         if (method == null) return "";
         return method.trim().toUpperCase(Locale.ROOT);
@@ -32,6 +24,14 @@ public class RouteKey {
         while (trimmed.contains("//")) trimmed = trimmed.replace("//", "/");
         if (trimmed.length() > 1 && trimmed.endsWith("/")) trimmed = trimmed.substring(0, trimmed.length() - 1);
         return trimmed;
+    }
+
+    public String getRequestMethod() {
+        return requestMethod;
+    }
+
+    public String getRequestPath() {
+        return requestPath;
     }
 
     @Override

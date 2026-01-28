@@ -11,6 +11,6 @@ public interface HandlerInterceptor {
     default void postHandle(HttpExchange exchange, Object handler, ModelAndView modelAndView) throws Exception {
     }
 
-    default void afterCompletion(HttpExchange exchange, Object handler,Exception ex) throws Exception {
+    default void afterCompletion(HttpExchange exchange, Object handler, Exception ex) throws Exception {
     }
 }

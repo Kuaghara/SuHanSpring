@@ -17,6 +17,8 @@ public interface ClassMetadata {
 
     boolean isIndependent();
 
+    Class<?> getClazz();
+
 
 
 }

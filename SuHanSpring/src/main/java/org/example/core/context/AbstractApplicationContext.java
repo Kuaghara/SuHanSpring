@@ -9,6 +9,7 @@ import org.example.core.context.beanFactory.ConfigurableListableBeanFactory;
 import org.example.core.context.beanFactory.DefaultListableBeanFactory;
 import org.example.core.context.event.*;
 import org.example.core.informationEntity.AnnotatedGenericBeanDefinition;
+import org.example.core.util.BeanUtil;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -42,7 +43,6 @@ public abstract class AbstractApplicationContext implements ConfigurableApplicat
 
 
     private void registrationBasicsBeanFactoryPostProcessors(DefaultListableBeanFactory registry) {
-        //我的beanDefinition_map中存储的bean名称为全小写（
         //拿来扫描bd和解析配置类的
         if (!registry.containsBeanDefinition("ConfigurationClassPostProcessor")) {
             registry.registerBeanDefinition("ConfigurationClassPostProcessor", new AnnotatedGenericBeanDefinition(ConfigurationClassPostProcessor.class));
@@ -50,6 +50,7 @@ public abstract class AbstractApplicationContext implements ConfigurableApplicat
                 BeanFactoryPostProcessor configurationClassPostProcessor = (BeanFactoryPostProcessor) this.getBean("ConfigurationClassPostProcessor");
                 registry.addBeanFactoryPostProcessor(configurationClassPostProcessor);
                 registry.registerSingleton("ConfigurationClassPostProcessor", configurationClassPostProcessor);
+                BeanUtil.setBeanFactory( registry);
             } catch (Exception e) {
                 throw new RuntimeException("创建基础的ConfigurationClassPostProcessor时报错");
             }
@@ -91,6 +92,11 @@ public abstract class AbstractApplicationContext implements ConfigurableApplicat
     @Override
     public <T> T getBean(String beanName, Class<T> clazz) throws Exception {
         return getBeanFactory().getBean(beanName, clazz);
+    }
+
+    @Override
+    public <T> T getBean(Class<T> clazz) {
+        return getBeanFactory().getBean(clazz);
     }
 
     @Override

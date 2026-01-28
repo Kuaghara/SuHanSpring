@@ -8,6 +8,7 @@ import org.example.core.informationEntity.BeanDefinition;
 import java.util.List;
 
 public class AnnotationApplicationContext extends GenericApplicationContext{
+
     final private BeanDefinitionReader annotationReader;//通过配置类进行注册的读取器
     //final private BeanDefinitionReader classReader;//通过路径进行注册的读取器
 
@@ -58,14 +59,7 @@ public class AnnotationApplicationContext extends GenericApplicationContext{
 //        }
 //    }
 
-    @Override
-    public Object getBean(String beanName) {
-        try {
-            return super.getBean(beanName);
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-    }
+
 
     private void register(Class<?> mainConfig){
         super.registerBeanDefinition(mainConfig.getSimpleName(), new AnnotatedGenericBeanDefinition(mainConfig));

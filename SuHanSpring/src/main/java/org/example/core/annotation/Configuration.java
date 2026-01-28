@@ -7,6 +7,7 @@ import java.lang.annotation.Target;
 
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)
+@Order(3)
 public @interface Configuration {
     String value() default "";
 

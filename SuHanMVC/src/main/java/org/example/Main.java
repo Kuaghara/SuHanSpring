@@ -5,8 +5,6 @@ import org.example.config.SpringConfig;
 import org.example.core.context.AnnotationApplicationContext;
 import org.example.core.context.ApplicationContext;
 
-import java.net.InetSocketAddress;
-
 public class Main {
     public static void main(String[] args) {
         ApplicationContext context = new AnnotationApplicationContext(SpringConfig.class);

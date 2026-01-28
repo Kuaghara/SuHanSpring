@@ -35,7 +35,6 @@ public class PostProcessorRegistrationDelegate {
         for(BeanFactoryPostProcessor beanFactoryPostProcessor : firstBeanFactoryPostProcessors){
             if(beanFactoryPostProcessor instanceof BeanDefinitionRegistryPostProcessor beanDefinitionRegistryPostProcessor){
                 beanDefinitionRegistryPostProcessor.postProcessBeanDefinitionRegistry(beanFactory);
-                registeredPostProcessors.add(beanDefinitionRegistryPostProcessor);
             }
             else{
                 commonlyPostProcessors.add(beanFactoryPostProcessor);

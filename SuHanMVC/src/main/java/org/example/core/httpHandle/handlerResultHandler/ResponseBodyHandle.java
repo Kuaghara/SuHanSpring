@@ -8,7 +8,6 @@ import org.example.core.util.AnnotationUtil;
 import java.io.OutputStream;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
-import java.lang.reflect.Parameter;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -19,7 +18,7 @@ public class ResponseBodyHandle implements HandlerResultHandler {
 
         System.out.println("进入到ResponseBodyHandle");
 
-        try(OutputStream responseBody = exchange.getResponseBody()){
+        try (OutputStream responseBody = exchange.getResponseBody()) {
             String json = JSON.toJSONString(invoked);
             exchange.getResponseHeaders().add("Content-Type", "application/json");
             exchange.sendResponseHeaders(200, json.getBytes().length);
@@ -36,7 +35,7 @@ public class ResponseBodyHandle implements HandlerResultHandler {
         System.out.println("进入到ResponseBodyHandle isMatch");
 
         Class<?> clazz = controller.getClass();
-        List<Annotation> annonationsList = AnnotationUtil.getAnnotationsList(clazz,new ArrayList<>());
+        List<Annotation> annonationsList = AnnotationUtil.getAnnotationsList(clazz, new ArrayList<>());
         if (AnnotationUtil.listIncludeAnnotation(annonationsList, ResponseBody.class)) {
             return true;
         }

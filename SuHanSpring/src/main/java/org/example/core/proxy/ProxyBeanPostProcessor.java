@@ -12,6 +12,15 @@ import org.example.core.proxy.context.JdkProxyFactory;
 
 public class ProxyBeanPostProcessor implements MergedBeanDefinitionPostProcessor, SmartInitializationAwareBeanPostProcessor {
 
+    @Deprecated
+    public static BeanDefinition asBeanDefinitionAdd() {
+        AnnotatedGenericBeanDefinition bd = new AnnotatedGenericBeanDefinition();
+        bd.setClassName(ProxyBeanPostProcessor.class.getSimpleName());
+        bd.setClazz(ProxyBeanPostProcessor.class);
+        bd.setScope("singleton");
+        return bd;
+    }
+
     //两个操作，1判断是否为AOP并且位于beanDefinition_Map中 2根据该AOP的请款去选择使用哪种代理方法进行代理
     @Override
     public Object postProcessAfterInitialization(Object bean, String beanName) {
@@ -27,12 +36,12 @@ public class ProxyBeanPostProcessor implements MergedBeanDefinitionPostProcessor
     /// 此处的设想是用于提前aop，实际上就是重新调用了一次初始化后
     @Override
     public Object applyAfterInitializationMethod(String name, Object bean) {
-       return postProcessAfterInitialization(bean, name);
+        return postProcessAfterInitialization(bean, name);
     }
 
     @Override
     public void postProcessMergedBeanDefinition(BeanDefinition beanDefinition, Class<?> beanType, String beanName) {
-       registerAdvisor(beanDefinition);
+        registerAdvisor(beanDefinition);
     }
 
     private void registerAdvisor(BeanDefinition bd) {
@@ -41,14 +50,5 @@ public class ProxyBeanPostProcessor implements MergedBeanDefinitionPostProcessor
             AnnotationResolver annotationResolver = new AnnotationResolver();
             annotationResolver.parse(bd.getClazz());
         }
-    }
-
-    @Deprecated
-    public static BeanDefinition asBeanDefinitionAdd() {
-        AnnotatedGenericBeanDefinition bd = new AnnotatedGenericBeanDefinition();
-        bd.setClassName(ProxyBeanPostProcessor.class.getSimpleName());
-        bd.setClazz(ProxyBeanPostProcessor.class);
-        bd.setScope("singleton");
-        return bd;
     }
 }

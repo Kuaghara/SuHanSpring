@@ -4,25 +4,20 @@ import org.example.core.transactionFactory.TransactionFactory;
 
 import javax.sql.DataSource;
 import java.util.Map;
-import java.util.Properties;
 
 public class Environment {
     String id;
     TransactionFactory transactionFactory;
     DataSource dataSource;
-    Map<String ,  String> configResource;
+    Map<String, String> configResource;
 
     public Environment() {
     }
 
-    public Environment(String id , TransactionFactory transactionFactory , DataSource dataSource ){
+    public Environment(String id, TransactionFactory transactionFactory, DataSource dataSource) {
         this.id = id;
         this.transactionFactory = transactionFactory;
         this.dataSource = dataSource;
-    }
-
-    public void setConfigResource(Map<String , String> configResource) {
-        this.configResource = configResource;
     }
 
     public String getId() {
@@ -51,5 +46,9 @@ public class Environment {
 
     public Map<String, String> getConfigResource() {
         return configResource;
+    }
+
+    public void setConfigResource(Map<String, String> configResource) {
+        this.configResource = configResource;
     }
 }

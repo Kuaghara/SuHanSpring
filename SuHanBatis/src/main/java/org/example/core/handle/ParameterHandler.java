@@ -17,14 +17,12 @@ public class ParameterHandler {
     public <T> boolean isTypeMatch(String parameterType, T t) {
         if (parameterType == null) {
             return String.class.isAssignableFrom(t.getClass()) ||
-                    Integer.class.isAssignableFrom(t.getClass())||
+                    Integer.class.isAssignableFrom(t.getClass()) ||
                     Long.class.isAssignableFrom(t.getClass());
-        }
-        else if (t != null && parameterType.isEmpty()) {
+        } else if (t != null && parameterType.isEmpty()) {
             //插入和修改的sql语句
-           return true;
-        }
-        else {
+            return true;
+        } else {
             Class<?> clazz = resolvePrimitiveType(parameterType);
             return clazz.isAssignableFrom(t.getClass());
         }
@@ -48,20 +46,20 @@ public class ParameterHandler {
 
     private Class<?> otherType(String parameterType) {
         try {
-            return  Class.forName(parameterType);
+            return Class.forName(parameterType);
         } catch (ClassNotFoundException e) {
-            throw new RuntimeException(e+"查找类型时错误");
+            throw new RuntimeException(e + "查找类型时错误");
         }
     }
 
     //新写一个方法，用于拆分@Parma注解变成map传入
-    public Map<String , Object> readTheShapeParameter(Method method ,Object[] args){
-        Map<String , Object> map = new HashMap<>();
-        Parameter [] parameters = method.getParameters();
+    public Map<String, Object> readTheShapeParameter(Method method, Object[] args) {
+        Map<String, Object> map = new HashMap<>();
+        Parameter[] parameters = method.getParameters();
         int i = 0;
-        for(Parameter parameter : parameters){
+        for (Parameter parameter : parameters) {
             Annotation annotation = parameter.getAnnotation(Param.class);
-            if(annotation != null){
+            if (annotation != null) {
                 String key = ((Param) annotation).value();
                 map.put(key, args[i++]);
             }

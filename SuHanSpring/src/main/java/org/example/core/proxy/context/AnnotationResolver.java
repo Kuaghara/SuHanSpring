@@ -67,15 +67,15 @@ public class AnnotationResolver {
             }
         }
     }
-    public void parseAsync(Class<?> beanClass,Method  method){
-        try{
+
+    public void parseAsync(Class<?> beanClass, Method method) {
+        try {
             AsyncPoint asyncPoint = new AsyncPoint();
             Object aspect = beanClass.getDeclaredConstructor().newInstance();
-            Advisor advisor = asyncPoint.getAdvisor(method,aspect);
+            Advisor advisor = asyncPoint.getAdvisor(method, aspect);
             advisorList.add(advisor);
-        }
-        catch (InvocationTargetException | InstantiationException | IllegalAccessException |
-               NoSuchMethodException e) {
+        } catch (InvocationTargetException | InstantiationException | IllegalAccessException |
+                 NoSuchMethodException e) {
             throw new RuntimeException(e);
         }
     }

@@ -20,16 +20,18 @@ import java.util.Map;
 public class ObjectHandler {
     private XmlMapperBuilder xmlMapperBuilder = new XmlMapperBuilder();
 
-    public ObjectHandler(){}
+    public ObjectHandler() {
+    }
+
     //在这里我还得想办法处理一下别名
-    public<T> List<T> handleResultForList(ResultSet resultSet , MapperStatement statementObj, Configuration config){
+    public <T> List<T> handleResultForList(ResultSet resultSet, MapperStatement statementObj, Configuration config) {
         AliasRegistry aliasRegistry = config.getAliasRegistry();
         //先判断有没有resultMap
-        if(statementObj.getResultMap().isEmpty()){
+        if (statementObj.getResultMap().isEmpty()) {
             String resultType = statementObj.getResultType();
             //再判断有没有别名
             String packageName = aliasRegistry.getPackageName(resultType);
-            if(packageName == null) {
+            if (packageName == null) {
                 packageName = resultType;
             }
             //然后开始创建对象，去获取class对象然后进行反射创建
@@ -43,19 +45,19 @@ public class ObjectHandler {
                 Object[] args = new Object[0];
                 List<T> resultList = new ArrayList<>();
 
-                while(resultSet.next()) {
+                while (resultSet.next()) {
                     Object bean;
                     if (theConstructor.getParameterCount() == 0) {
                         bean = theConstructor.newInstance();
-                        T obj = setProperties(bean, resultClazz, resultSet ,null);
+                        T obj = setProperties(bean, resultClazz, resultSet, null);
                         resultList.add(obj);
                     } else {
                         //对参数数组进行一次判断，看看有没有经历过查询获取默认参数值
-                        if(args.length == 0) {
+                        if (args.length == 0) {
                             args = getParameterConstructorArgs(theConstructor);
                         }
                         bean = theConstructor.newInstance(args);
-                        T obj = setProperties(bean, resultClazz, resultSet ,null);
+                        T obj = setProperties(bean, resultClazz, resultSet, null);
                         resultList.add(obj);
                     }
                 }
@@ -64,8 +66,7 @@ public class ObjectHandler {
                      IllegalAccessException | SQLException e) {
                 throw new RuntimeException(e);
             }
-        }
-        else {
+        } else {
             //此时的resultMap还没有从Mapper里挑出来（
             String resultMap = statementObj.getResultMap();
             Mapper mapper = statementObj.getMapper();
@@ -74,7 +75,7 @@ public class ObjectHandler {
             //然后从别名中获取返回对象的名字
             String type = resultMapObj.getType();
             String packageName = aliasRegistry.getPackageName(type);
-            if(packageName.isEmpty()) {
+            if (packageName.isEmpty()) {
                 packageName = type;
             }
 
@@ -89,17 +90,17 @@ public class ObjectHandler {
                 Object[] args = new Object[0];
                 List<T> resultList = new ArrayList<>();
 
-                while(resultSet.next()) {
+                while (resultSet.next()) {
                     Object bean;
                     if (theConstructor.getParameterCount() == 0) {
                         bean = theConstructor.newInstance();
                     } else {
                         //对参数数组进行一次判断，看看有没有经历过查询获取默认参数值
-                        if(args.length == 0) {
+                        if (args.length == 0) {
                             args = getParameterConstructorArgs(theConstructor);
                         }
                         bean = theConstructor.newInstance(args);
-                        T obj = setProperties(bean, resultClazz, resultSet ,resultMapObj);
+                        T obj = setProperties(bean, resultClazz, resultSet, resultMapObj);
                         resultList.add(obj);
                     }
                 }
@@ -110,29 +111,25 @@ public class ObjectHandler {
             }
         }
     }
+
     //获取构造方法中参数的各种默认值，然后进行反射创建对象
-    private Object[] getParameterConstructorArgs(Constructor<?> constructor){
+    private Object[] getParameterConstructorArgs(Constructor<?> constructor) {
         Class<?>[] parameterTypes = constructor.getParameterTypes();
         Object[] args = new Object[parameterTypes.length];
-        for(int i = 0; i < parameterTypes.length; i++){
-            if (parameterTypes[i] == String.class ||parameterTypes[i] == char.class || parameterTypes[i] == Character.class){
+        for (int i = 0; i < parameterTypes.length; i++) {
+            if (parameterTypes[i] == String.class || parameterTypes[i] == char.class || parameterTypes[i] == Character.class) {
                 args[i] = " ";
-            }
-            else if (parameterTypes[i] == int.class || parameterTypes[i] == Integer.class){
+            } else if (parameterTypes[i] == int.class || parameterTypes[i] == Integer.class) {
                 args[i] = 0;
             } else if (parameterTypes[i] == float.class || parameterTypes[i] == Float.class) {
                 args[i] = 0.0f;
-            }
-            else if (parameterTypes[i] == double.class || parameterTypes[i] == Double.class) {
+            } else if (parameterTypes[i] == double.class || parameterTypes[i] == Double.class) {
                 args[i] = 0.0;
-            }
-            else if (parameterTypes[i] == boolean.class || parameterTypes[i] == Boolean.class) {
+            } else if (parameterTypes[i] == boolean.class || parameterTypes[i] == Boolean.class) {
                 args[i] = false;
-            }
-            else if (parameterTypes[i] == long.class || parameterTypes[i] == Long.class) {
+            } else if (parameterTypes[i] == long.class || parameterTypes[i] == Long.class) {
                 args[i] = 0L;
-            }
-            else  {
+            } else {
                 args[i] = null;
             }
         }
@@ -141,9 +138,9 @@ public class ObjectHandler {
 
     //反射创建对象后，将数据库中查找到的信息属性列名与实体类中的属性名进行匹配，能匹配上就赋值
     //无法匹配就不管，为空（我给他们赋值了默认值），此处还得开始考虑resultMap的事情了（
-    private <T> T setProperties(Object bean ,Class<?> clazz , ResultSet resultSet ,ResultMap resultMap) throws SQLException, IllegalAccessException {
+    private <T> T setProperties(Object bean, Class<?> clazz, ResultSet resultSet, ResultMap resultMap) throws SQLException, IllegalAccessException {
         Field[] fields = clazz.getDeclaredFields();
-        if(resultMap == null) {
+        if (resultMap == null) {
             try {
                 for (int i = 1; i <= resultSet.getMetaData().getColumnCount(); i++) {
                     String columnName = resultSet.getMetaData().getColumnName(i);
@@ -160,11 +157,9 @@ public class ObjectHandler {
                     }
                 }
                 return (T) bean;
-            }
-            catch (SQLException e){
+            } catch (SQLException e) {
                 throw new RuntimeException(e);
-            }
-            catch (IllegalAccessException e){
+            } catch (IllegalAccessException e) {
                 throw new RuntimeException("数据库内类型与实体类中类型并不相同");
             }
         }
@@ -181,8 +176,8 @@ public class ObjectHandler {
                 boolean idIsFound = false;
                 for (Field field : fields) {
                     String propertyNameInEntity = field.getName();
-                    if(!idIsFound && propertyNameInEntity.equals(resultMap.getIdPropertyInXml())){
-                        if(!propertyNameInEntity.equals(resultMap.getIdColumnInXml())){
+                    if (!idIsFound && propertyNameInEntity.equals(resultMap.getIdPropertyInXml())) {
+                        if (!propertyNameInEntity.equals(resultMap.getIdColumnInXml())) {
                             throw new RuntimeException("实体类中主键属性名与xml中属性名不一致");
                         }
                         field.setAccessible(true);
@@ -193,7 +188,7 @@ public class ObjectHandler {
                     }
 
                     if (propertyNameInEntity.equals(resultMap.getResultMap().get(columnNameInDatabase))) {
-                        if(!propertyNameInEntity.equals(resultMap.getIdPropertyInXml())){
+                        if (!propertyNameInEntity.equals(resultMap.getIdPropertyInXml())) {
                             throw new RuntimeException("实体类中属性名与xml中属性名不一致");
                         }
                         field.setAccessible(true);
@@ -207,29 +202,29 @@ public class ObjectHandler {
         }
     }
     /*统计下流程和需要的数据
-    * 1.result的列数->用于划定一层循环的范围
-    * 2.result每一列的列明->用于与实体类中的属性名进行匹配
-    * 3.实体类中的属性名->用于与result每一列的列明进行匹配
-    * ----------
-    * 需要进行缓存的数值：
-    * 1.args 实体类构造方法的参数list->避免多次查询增加效率
-    * 2.result每一列的列名->避免多次查询增加效率
-    * ----------
-    * 当前思路：resultSet只能.next()来进行下一步，没法获取具体多少的行数
-    * 1.最外层while(resultSet.next())循环
-    * 2.内层进行一次创建实体类
-    * 3.创建完进行赋值
-    * 4.返回后加入返回的数组中
-    * */
+     * 1.result的列数->用于划定一层循环的范围
+     * 2.result每一列的列明->用于与实体类中的属性名进行匹配
+     * 3.实体类中的属性名->用于与result每一列的列明进行匹配
+     * ----------
+     * 需要进行缓存的数值：
+     * 1.args 实体类构造方法的参数list->避免多次查询增加效率
+     * 2.result每一列的列名->避免多次查询增加效率
+     * ----------
+     * 当前思路：resultSet只能.next()来进行下一步，没法获取具体多少的行数
+     * 1.最外层while(resultSet.next())循环
+     * 2.内层进行一次创建实体类
+     * 3.创建完进行赋值
+     * 4.返回后加入返回的数组中
+     * */
 
-    public<K,V> Map<K,V> handleResultForMap(ResultSet resultSet , MapperStatement statementObj, Configuration config,String mapKey){
+    public <K, V> Map<K, V> handleResultForMap(ResultSet resultSet, MapperStatement statementObj, Configuration config, String mapKey) {
         AliasRegistry aliasRegistry = config.getAliasRegistry();
         //先判断有没有resultMap
-        if(statementObj.getResultMap().isEmpty()){
+        if (statementObj.getResultMap().isEmpty()) {
             String resultType = statementObj.getResultType();
             //再判断有没有别名
             String packageName = aliasRegistry.getPackageName(resultType);
-            if(packageName == null) {
+            if (packageName == null) {
                 packageName = resultType;
             }
             //然后开始创建对象，去获取class对象然后进行反射创建
@@ -241,24 +236,24 @@ public class ObjectHandler {
 
                 theConstructor = constructors[0];
                 Object[] args = new Object[0];
-                Map<K,V> resultMap = new HashMap<>();
+                Map<K, V> resultMap = new HashMap<>();
 
-                while(resultSet.next()) {
+                while (resultSet.next()) {
                     Object bean;
                     if (theConstructor.getParameterCount() == 0) {
                         bean = theConstructor.newInstance();
-                        V obj = setProperties(bean, resultClazz, resultSet ,null);
+                        V obj = setProperties(bean, resultClazz, resultSet, null);
                         K key = (K) resultSet.getObject(mapKey);
-                        resultMap.put(key,obj);
+                        resultMap.put(key, obj);
                     } else {
                         //对参数数组进行一次判断，看看有没有经历过查询获取默认参数值
-                        if(args.length == 0) {
+                        if (args.length == 0) {
                             args = getParameterConstructorArgs(theConstructor);
                         }
                         bean = theConstructor.newInstance(args);
-                        V obj = setProperties(bean, resultClazz, resultSet ,null);
+                        V obj = setProperties(bean, resultClazz, resultSet, null);
                         K key = (K) resultSet.getObject(mapKey);
-                       resultMap.put(key,obj);
+                        resultMap.put(key, obj);
                     }
                 }
                 return resultMap;
@@ -266,8 +261,7 @@ public class ObjectHandler {
                      IllegalAccessException | SQLException e) {
                 throw new RuntimeException(e);
             }
-        }
-        else {
+        } else {
             //此时的resultMap还没有从Mapper里挑出来（
             String resultMap = statementObj.getResultMap();
             Mapper mapper = statementObj.getMapper();
@@ -276,7 +270,7 @@ public class ObjectHandler {
             //然后从别名中获取返回对象的名字
             String type = resultMapObj.getType();
             String packageName = aliasRegistry.getPackageName(type);
-            if(packageName.isEmpty()) {
+            if (packageName.isEmpty()) {
                 packageName = type;
             }
 
@@ -289,25 +283,25 @@ public class ObjectHandler {
 
                 theConstructor = constructors[0];
                 Object[] args = new Object[0];
-                Map<K ,V> rm = new HashMap<>();
+                Map<K, V> rm = new HashMap<>();
 
-                while(resultSet.next()) {
+                while (resultSet.next()) {
                     Object bean;
                     if (theConstructor.getParameterCount() == 0) {
                         bean = theConstructor.newInstance();
-                        V obj = setProperties(bean, resultClazz, resultSet ,resultMapObj);
+                        V obj = setProperties(bean, resultClazz, resultSet, resultMapObj);
                         K key = (K) resultSet.getObject(mapKey);
-                        rm.put(key,obj);
+                        rm.put(key, obj);
                     } else {
                         //对参数数组进行一次判断，看看有没有经历过查询获取默认参数值
-                        if(args.length == 0) {
+                        if (args.length == 0) {
                             args = getParameterConstructorArgs(theConstructor);
 
                         }
                         bean = theConstructor.newInstance(args);
-                        V obj = setProperties(bean, resultClazz, resultSet ,resultMapObj);
+                        V obj = setProperties(bean, resultClazz, resultSet, resultMapObj);
                         K key = (K) resultSet.getObject(mapKey);
-                        rm.put(key,obj);
+                        rm.put(key, obj);
                     }
                 }
                 return rm;

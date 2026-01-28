@@ -3,6 +3,7 @@ package org.example.core.httpHandle.argsHandle;
 import com.alibaba.fastjson2.JSON;
 import com.sun.net.httpserver.HttpExchange;
 import org.example.core.annotation.RequestBody;
+
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.lang.reflect.Parameter;
@@ -21,7 +22,7 @@ public class RequestBodyHandle implements HandleArgs {
             // 从请求体中读取数据
             String requestBody = readRequestBody(exchange);
 
-            if ( requestBody.trim().isEmpty()) {
+            if (requestBody.trim().isEmpty()) {
                 RequestBody requestBodyAnnotation = parameter.getAnnotation(RequestBody.class);
                 if (requestBodyAnnotation.required()) {
                     throw new IllegalArgumentException("必需的请求体数据未提供");

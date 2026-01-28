@@ -4,16 +4,17 @@ import org.example.core.confguration.Configuration;
 
 import java.sql.Connection;
 
-public class DefaultSqlSessionFactory implements SqlSessionFactory{
+public class DefaultSqlSessionFactory implements SqlSessionFactory {
 
     private Configuration config;
 
     public DefaultSqlSessionFactory(Configuration configuration) {
         this.config = configuration;
     }
+
     @Override
     public SqlSession openSession() {
-        return openSession(null,true);
+        return openSession(null, true);
     }
 
     @Override
@@ -32,8 +33,9 @@ public class DefaultSqlSessionFactory implements SqlSessionFactory{
     }
 
     @Override
-    public SqlSession openSession(String transactionIsolationLevel, boolean autoCommit)
-    {return new DefaultSqlSession(config, config.getConnection(), transactionIsolationLevel, autoCommit);}
+    public SqlSession openSession(String transactionIsolationLevel, boolean autoCommit) {
+        return new DefaultSqlSession(config, config.getConnection(), transactionIsolationLevel, autoCommit);
+    }
 
     @Override
     public Configuration getConfig() {

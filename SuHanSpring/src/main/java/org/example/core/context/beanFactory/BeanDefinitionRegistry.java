@@ -12,7 +12,7 @@ public interface BeanDefinitionRegistry {
 
     BeanDefinition getBeanDefinition(String beanName);
 
-    Map<String , BeanDefinition> getBeanDefinitionMap();
+    Map<String, BeanDefinition> getBeanDefinitionMap();
 
     boolean containsBeanDefinition(String beanName);
 

@@ -4,11 +4,14 @@ import org.example.core.context.ThreadPoolManager;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.concurrent.*;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Future;
 
 public class AsyncPoint implements PointParser {
 
     private static ExecutorService executorService = ThreadPoolManager.getThreadPool();
+
     @Override
     public Advisor getAdvisor(Method amethod, Object aspect) {
         Class<?> clazz = aspect.getClass();
@@ -20,11 +23,11 @@ public class AsyncPoint implements PointParser {
                 Callable<Object> task = () -> {
                     Object invoke;
                     try {
-                         invoke = amethod.invoke(aspect);
+                        invoke = amethod.invoke(aspect);
                     } catch (IllegalAccessException | InvocationTargetException e) {
                         throw new RuntimeException(e);
                     }
-                    if (invoke instanceof Future<?>){
+                    if (invoke instanceof Future<?>) {
                         return ((Future<?>) invoke).get();
                     }
                     return null;

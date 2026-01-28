@@ -5,11 +5,10 @@ import java.sql.*;
 //能看出这是干啥的，但是我写这个只是为了写pooledDataSource的api
 public class JdbcConnectionBuilder implements ConnectionBuilder {
 
-    private String username;
-    private String password;
     ShardingKey shardingKey; //这俩啥啊？
     ShardingKey superShardingKey;
-
+    private String username;
+    private String password;
 
     @Override
     public ConnectionBuilder user(String username) {
@@ -37,6 +36,6 @@ public class JdbcConnectionBuilder implements ConnectionBuilder {
 
     @Override
     public Connection build() throws SQLException {
-        return DriverManager.getConnection("com.mysql.cj.jdbd.Driver",username,password);
+        return DriverManager.getConnection("com.mysql.cj.jdbd.Driver", username, password);
     }
 }

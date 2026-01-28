@@ -8,7 +8,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-public class DefaultApplicationEventMulticaster implements ApplicationEventMulticaster{
+public class DefaultApplicationEventMulticaster implements ApplicationEventMulticaster {
     List<ApplicationListener<?>> listeners = new ArrayList<>();
 
     @Override
@@ -23,21 +23,21 @@ public class DefaultApplicationEventMulticaster implements ApplicationEventMulti
 
     @Override
     public void multicastEvent(ApplicationEvent<?> event) {
-        for(ApplicationListener<?> listener: listeners){
-            if(isSupportedEvent(listener, event)){
+        for (ApplicationListener<?> listener : listeners) {
+            if (isSupportedEvent(listener, event)) {
                 listener.onEvent(event);
             }
         }
     }
 
-    private Boolean isSupportedEvent(ApplicationListener<?> listener, ApplicationEvent<?> event){
+    private Boolean isSupportedEvent(ApplicationListener<?> listener, ApplicationEvent<?> event) {
         Class<?> listenerClass = listener.getClass();
         Class<?> eventClass = event.getClass();
         Type[] eventTypeOfListener = listenerClass.getGenericInterfaces();
 
-        for(Type type: eventTypeOfListener){
-            if(type instanceof ParameterizedType parameterizedType) {
-                Class<?> rawType = (Class<?>)parameterizedType.getRawType();
+        for (Type type : eventTypeOfListener) {
+            if (type instanceof ParameterizedType parameterizedType) {
+                Class<?> rawType = (Class<?>) parameterizedType.getRawType();
                 if (ApplicationListener.class.isAssignableFrom(rawType)) {
 
                     Type[] actualTypeArguments = parameterizedType.getActualTypeArguments();

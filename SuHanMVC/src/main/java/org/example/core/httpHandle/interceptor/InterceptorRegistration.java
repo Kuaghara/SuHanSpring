@@ -1,7 +1,6 @@
 package org.example.core.httpHandle.interceptor;
 
 import com.sun.net.httpserver.HttpExchange;
-import org.example.core.annotation.Order;
 import org.example.core.httpHandle.ModelAndView;
 
 import java.util.*;
@@ -24,10 +23,10 @@ public class InterceptorRegistration {
         System.out.println("=== 开始执行拦截器 ===");
         System.out.println("请求路径: " + requestPath);
         System.out.println("拦截器数量: " + interceptors.size());
-        
+
         try {
-            for(InterceptorRegistry interceptor : interceptors){
-                System.out.println("对拦截器进行循环遍历："+interceptor);
+            for (InterceptorRegistry interceptor : interceptors) {
+                System.out.println("对拦截器进行循环遍历：" + interceptor);
             }
 
             for (InterceptorRegistry interceptor : interceptors) {
@@ -50,17 +49,17 @@ public class InterceptorRegistration {
             }
 
             System.out.println("匹配到的拦截器数量: " + preHandleInterceptors.size());
-            
-            for(InterceptorRegistry interceptor : preHandleInterceptors){
+
+            for (InterceptorRegistry interceptor : preHandleInterceptors) {
                 System.out.println("执行拦截器: " + interceptor);
                 boolean b = interceptor.doPreHandle(exchange, handler);
-                if(!b){
+                if (!b) {
                     System.out.println("拦截器返回false，中断执行");
                     return;
                 }
                 AfterHandleInterceptors.push(interceptor);
             }
-            
+
             System.out.println("拦截器执行完成");
         } catch (Exception e) {
             e.printStackTrace();
@@ -69,13 +68,13 @@ public class InterceptorRegistration {
     }
 
     public void PostHandle(String requestPath, HttpExchange exchange, Object handler, ModelAndView modelAndView) {
-        for(InterceptorRegistry interceptor : AfterHandleInterceptors){
-            interceptor.doPostHandle(exchange, handler,modelAndView);
+        for (InterceptorRegistry interceptor : AfterHandleInterceptors) {
+            interceptor.doPostHandle(exchange, handler, modelAndView);
         }
     }
 
     public void AfterCompletion(String requestPath, HttpExchange exchange, Object handler, Exception ex) {
-        for (InterceptorRegistry interceptor : AfterHandleInterceptors){
+        for (InterceptorRegistry interceptor : AfterHandleInterceptors) {
             interceptor.doAfterCompletion(exchange, handler, ex);
         }
     }

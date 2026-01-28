@@ -1,6 +1,5 @@
 package org.example.core.httpHandle.handlerResultHandler;
 
-import com.alibaba.fastjson2.JSON;
 import com.sun.net.httpserver.HttpExchange;
 import org.example.core.httpHandle.ModelAndView;
 
@@ -8,7 +7,7 @@ import java.io.OutputStream;
 import java.lang.reflect.Method;
 import java.nio.charset.StandardCharsets;
 
-public class ModelAndViewHandle implements HandlerResultHandler{
+public class ModelAndViewHandle implements HandlerResultHandler {
     @Override
     public void handle(HttpExchange exchange, Object invoked) {
 
@@ -18,7 +17,7 @@ public class ModelAndViewHandle implements HandlerResultHandler{
             // 设置响应头
             exchange.getResponseHeaders().set("Content-Type", "application/html; charset=utf-8");
 
-            String jsonResponse = "这是一个ModelAndView格式的类，名为："+ ((ModelAndView)invoked).getViewName();
+            String jsonResponse = "这是一个ModelAndView格式的类，名为：" + ((ModelAndView) invoked).getViewName();
             byte[] jsonBytes = jsonResponse.getBytes(StandardCharsets.UTF_8);
 
             // 发送响应头

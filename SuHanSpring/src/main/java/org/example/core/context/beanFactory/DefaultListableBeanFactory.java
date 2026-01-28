@@ -1,16 +1,15 @@
 package org.example.core.context.beanFactory;
 
-import org.example.core.annotation.Order;
-import org.example.core.beanFactoryPostProcessor.PostProcessorRegistrationDelegate;
 import org.example.core.beanFactoryPostProcessor.BeanFactoryPostProcessor;
+import org.example.core.beanFactoryPostProcessor.PostProcessorRegistrationDelegate;
 import org.example.core.beanPostProcessor.BeanPostProcessor;
 import org.example.core.beanPostProcessor.SmartInitializationAwareBeanPostProcessor;
 import org.example.core.beanPostProcessor.SmartInstantiationAwareBeanPostProcessor;
+import org.example.core.context.ApplicationContext;
 import org.example.core.informationEntity.AutoElement;
 import org.example.core.informationEntity.BeanDefinition;
 import org.example.core.util.AnnotationUtil;
 
-import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
@@ -18,16 +17,16 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static org.example.core.util.AnnotationUtil.beanDefinitionSort;
-
 public class DefaultListableBeanFactory implements ConfigurableListableBeanFactory, BeanDefinitionRegistry {
 
+    public boolean cyclicDependent = true;
     /// 存储beanDefinition
     Map<String, BeanDefinition> beanDefinitionMap = new HashMap<>();
     /// 一层缓存，存储单例Bean
     Map<String, Object> singletonObjects = new HashMap<>();
     /// 二层缓存
     Map<String, Object> earlySingletonObjects = new HashMap<>();
+    ClassLoader SUHANCLASSLOADER;
     /// 三层缓存
     private Map<String, ObjectFactory<?>> singletonFactories = new HashMap<>();
     /// 拿来存储父beanFactory
@@ -36,13 +35,12 @@ public class DefaultListableBeanFactory implements ConfigurableListableBeanFacto
     private List<BeanPostProcessor> beanPostProcessors = new ArrayList<>();
     /// 存储抽象工厂
     private AbstractDefaultListableBeanFactory abstractFactory;
-    ClassLoader SUHANCLASSLOADER;
-
     private List<BeanFactoryPostProcessor> beanFactoryPostProcessors = new ArrayList<>();
 
-    public boolean cyclicDependent = true;
+    private ApplicationContext applicationContext;
 
-    public DefaultListableBeanFactory() {
+    public DefaultListableBeanFactory(ApplicationContext applicationContext) {
+        this.applicationContext = applicationContext;
         abstractFactory = new AbstractDefaultListableBeanFactory(this);
     }
 
@@ -86,7 +84,6 @@ public class DefaultListableBeanFactory implements ConfigurableListableBeanFacto
             bean = earlySingletonObjects.get(beanName);
             BeanDefinition bd = beanDefinitionMap.get(beanName);
             if (bean != null && bd.isSingleton()) {
-                // Return early reference to break circular dependencies (avoid creating a second instance).
                 return bean;
             } else if (bean == null) {
                 bean = abstractFactory.doGetBean(beanName);
@@ -95,21 +92,30 @@ public class DefaultListableBeanFactory implements ConfigurableListableBeanFacto
         return bean;
     }
 
-     @Override
+    @Override
+    public <T> T getBean(Class<T> clazz) {
+            for (Map.Entry<String, Object> entry : singletonObjects.entrySet()) {
+                if (clazz.isInstance(entry.getValue())) {
+                    return (T) entry.getValue();
+                }
+            }
+        throw new RuntimeException("此处为获取bean错误");
+    }
+
+    @Override
     public void preInstantiateSingletons() {
         List<BeanDefinition> bds = new ArrayList<>(beanDefinitionMap.values());
-        try{
+        try {
             //此处我要添加一个对beanDefinitions的排序
-            AnnotationUtil.beanDefinitionSort(bds,this);
-            for (BeanDefinition bd : bds){
+            AnnotationUtil.beanDefinitionSort(bds, this);
+            for (BeanDefinition bd : bds) {
                 String bdName = bd.getClassName();
                 if (bd.isSingleton() && !bd.isLazy()) {
                     registerSingleton(bdName, abstractFactory.doGetBean(bdName));
                     removeEarlyBean(bdName);
                 }
             }
-        }
-        catch (Exception e){
+        } catch (Exception e) {
             throw new RuntimeException("此处为工厂创建剩余bean错误", e);
         }
     }
@@ -124,7 +130,7 @@ public class DefaultListableBeanFactory implements ConfigurableListableBeanFacto
 
     @Override
     public void cyclicDependentState(boolean state) {
-       cyclicDependent = state;
+        cyclicDependent = state;
     }
 
     @Override
@@ -166,7 +172,7 @@ public class DefaultListableBeanFactory implements ConfigurableListableBeanFacto
 
     //这里套娃
     @Override
-    public <T> T getBean(String beanName, Class<T> clazz)  {
+    public <T> T getBean(String beanName, Class<T> clazz) {
         try {
             return clazz.cast(getBean(beanName));
         } catch (Exception e) {
@@ -177,17 +183,17 @@ public class DefaultListableBeanFactory implements ConfigurableListableBeanFacto
 
     @Override
     public Boolean containsBean(String beanName) {
-        return beanDefinitionMap.containsKey(beanName);
-    }
-
-    @Override
-    public void setParentBeanFactory(BeanFactory parentBeanFactory) {
-        this.parentBeanFactory = parentBeanFactory;
+        return singletonObjects.containsKey(beanName);
     }
 
     @Override
     public BeanFactory getParentBeanFactory() {
         return this.parentBeanFactory;
+    }
+
+    @Override
+    public void setParentBeanFactory(BeanFactory parentBeanFactory) {
+        this.parentBeanFactory = parentBeanFactory;
     }
 
     @Override
@@ -237,6 +243,10 @@ public class DefaultListableBeanFactory implements ConfigurableListableBeanFacto
         singletonFactories.remove(beanName);
     }
 
+    public void applyAware(Object o){
+        abstractFactory.applyAware( o);
+    }
+
     @Override
     public ObjectFactory<?> getFactory(String beanName) {
         return singletonFactories.get(beanName);
@@ -249,7 +259,7 @@ public class DefaultListableBeanFactory implements ConfigurableListableBeanFacto
     @Override
     public Boolean isTypeMatch(String name, Class<?> clazz) {
         Class<?> type = this.beanDefinitionMap.get(name).getClazz();
-        if(type == null){
+        if (type == null) {
             return false;
         }
         return clazz.isAssignableFrom(type);
@@ -258,8 +268,8 @@ public class DefaultListableBeanFactory implements ConfigurableListableBeanFacto
     @Override
     public List<String> getBeanNameForType(Class<?> clazz) {
         List<String> beanNameList = new ArrayList<>();
-        for (Map.Entry<String, BeanDefinition> entry : beanDefinitionMap.entrySet()){
-            if(clazz.isAssignableFrom(entry.getValue().getClazz())){
+        for (Map.Entry<String, BeanDefinition> entry : beanDefinitionMap.entrySet()) {
+            if (clazz.isAssignableFrom(entry.getValue().getClazz())) {
                 beanNameList.add(entry.getKey());
             }
         }
@@ -284,12 +294,26 @@ public class DefaultListableBeanFactory implements ConfigurableListableBeanFacto
     @Override
     public List<BeanDefinition> getBeanDefinitionList() {
         List<BeanDefinition> beanDefinitionList = new ArrayList<>();
-        for(Map.Entry<String , BeanDefinition> entry : beanDefinitionMap.entrySet()){
+        for (Map.Entry<String, BeanDefinition> entry : beanDefinitionMap.entrySet()) {
             beanDefinitionList.add(entry.getValue());
         }
         return beanDefinitionList;
     }
 
+    @Override
+    public ApplicationContext getApplicationContext() {
+        return applicationContext;
+    }
+
+    @Override
+    public void setApplicationContext(ApplicationContext applicationContext) {
+        this.applicationContext = applicationContext;
+    }
+
+    @Override
+    public void addBean(String name ,Object bean) {
+        singletonObjects.put(bean.getClass().getSimpleName(), bean);
+    }
     /*--------------弃置方法-----------------*/
 
     @Deprecated
@@ -371,13 +395,14 @@ public class DefaultListableBeanFactory implements ConfigurableListableBeanFacto
     }
 
     @Deprecated
-    private void invokeBeanFactoryPostProcessors(DefaultListableBeanFactory factory){
+    private void invokeBeanFactoryPostProcessors(DefaultListableBeanFactory factory) {
         PostProcessorRegistrationDelegate.invokeBeanFactoryPostProcessors(factory);
     }
+
     @Deprecated
-    public BeanPostProcessor  getBeanPostProcessor(Class<?> clazz){
-        for(BeanPostProcessor bp:beanPostProcessors){
-            if(clazz.isAssignableFrom(bp.getClass())){
+    public BeanPostProcessor getBeanPostProcessor(Class<?> clazz) {
+        for (BeanPostProcessor bp : beanPostProcessors) {
+            if (clazz.isAssignableFrom(bp.getClass())) {
                 return bp;
             }
         }

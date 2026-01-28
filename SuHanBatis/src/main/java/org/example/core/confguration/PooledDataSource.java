@@ -3,7 +3,6 @@ package org.example.core.confguration;
 import javax.sql.DataSource;
 import java.io.PrintWriter;
 import java.sql.*;
-import java.util.concurrent.*;
 import java.util.logging.Logger;
 
 public class PooledDataSource implements DataSource {
@@ -15,6 +14,7 @@ public class PooledDataSource implements DataSource {
     String url;
     String username;
     String password;
+
     /// ai误人啊家人们
 //    ThreadPoolExecutor executor = new ThreadPoolExecutor(
 //            5,  //核心线程5
@@ -25,12 +25,11 @@ public class PooledDataSource implements DataSource {
 //            Executors.defaultThreadFactory(),      //线程工厂
 //            new ThreadPoolExecutor.CallerRunsPolicy()   //拒绝策略
 //    );
-
-    public PooledDataSource(){
+    public PooledDataSource() {
 
     }
 
-    PooledDataSource(String driver, String url, String username, String password){
+    PooledDataSource(String driver, String url, String username, String password) {
         this.driver = driver;
         this.url = url;
         this.username = username;
@@ -39,19 +38,20 @@ public class PooledDataSource implements DataSource {
         openConnection();
     }
 
-    private void openConnection(){
+    private void openConnection() {
         try {
             this.connection = DriverManager.getConnection(url, username, password);
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
     }
-    public Connection getConnection(){
+
+    public Connection getConnection() {
         return connection;
     }
 
     @Override
-    public ConnectionBuilder createConnectionBuilder()  {
+    public ConnectionBuilder createConnectionBuilder() {
         return connectionBuilder;
     }
 
@@ -61,7 +61,7 @@ public class PooledDataSource implements DataSource {
         return connectionBuilder.build();
     }
 
-    ///后面方法先空置，不清楚干什么的
+    /// 后面方法先空置，不清楚干什么的
     @Override
     public PrintWriter getLogWriter() throws SQLException {
         return null;
@@ -73,13 +73,13 @@ public class PooledDataSource implements DataSource {
     }
 
     @Override
-    public void setLoginTimeout(int seconds) throws SQLException {
-
+    public int getLoginTimeout() throws SQLException {
+        return 0;
     }
 
     @Override
-    public int getLoginTimeout() throws SQLException {
-        return 0;
+    public void setLoginTimeout(int seconds) throws SQLException {
+
     }
 
     @Override

@@ -1,9 +1,9 @@
 package org.example.core.context.beanFactory;
 
 public interface ConfigurableBeanFactory extends HierarchicalBeanFactory, SingletonBeanRegistry {
-    void setParentBeanFactory(BeanFactory parentBeanFactory);
-
     BeanFactory getParentBeanFactory();
+
+    void setParentBeanFactory(BeanFactory parentBeanFactory);
 
     void setBeanClassLoader(ClassLoader beanClassLoader);
 

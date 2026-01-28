@@ -2,9 +2,7 @@ package org.example.core.httpHandle.argsHandle;
 
 import com.sun.net.httpserver.HttpExchange;
 import org.example.core.annotation.RequestHeader;
-import org.example.core.httpHandle.handlerResultHandler.HandlerResultHandler;
 
-import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 
 public class RequestHeaderHandle implements HandleArgs {
@@ -21,13 +19,13 @@ public class RequestHeaderHandle implements HandleArgs {
         boolean required = requestHeader.required();
 
         String value = exchange.getRequestHeaders().getFirst(paramName);
-        if(value == null && required){
+        if (value == null && required) {
             throw new RuntimeException("参数 " + paramName + " 不能为空");
         }
-        if(value == null && !defaultValue.isEmpty()){
+        if (value == null && !defaultValue.isEmpty()) {
             value = defaultValue;
         }
-        return  value;
+        return value;
     }
 
 }

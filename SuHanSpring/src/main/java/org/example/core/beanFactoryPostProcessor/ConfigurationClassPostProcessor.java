@@ -2,7 +2,9 @@ package org.example.core.beanFactoryPostProcessor;
 
 import org.example.core.annotation.Configuration;
 import org.example.core.annotation.Order;
+import org.example.core.beanAware.ApplicationAware;
 import org.example.core.beanPostProcessor.BeanDefinitionRegistryPostProcessor;
+import org.example.core.context.ApplicationContext;
 import org.example.core.context.beanFactory.BeanDefinitionRegistry;
 import org.example.core.context.beanFactory.ConfigurableListableBeanFactory;
 import org.example.core.context.reader.AnnotationBeanDefinitionReader;
@@ -17,11 +19,17 @@ import java.util.List;
 //以及会完成对配置类的解析(其实对beanDefinition的扫描就是对于@ComponentScan注解的解析)
 //解析会跳转到ConfigurationClassParser中
 @Order(9)
-public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPostProcessor,PriorityOrdered {
+public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPostProcessor,PriorityOrdered, ApplicationAware {
 
+    ApplicationContext applicationContext;
     @Override
     public int getOrder() {
         return 9;
+    }
+
+    @Override
+    public void applicationAware(ApplicationContext applicationContext) {
+       this.applicationContext = applicationContext;
     }
 
     @Override
@@ -30,7 +38,7 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
         for(String beanName : beanNames){
             BeanDefinition bd = registry.getBeanDefinition(beanName);
             if(AnnotationUtil.isConfigurationClass(bd.getClazz())){
-                new ConfigurationClassParser(new AnnotationBeanDefinitionReader( registry)).parse(bd , registry);
+                new ConfigurationClassParser(new AnnotationBeanDefinitionReader(registry), applicationContext).parse(bd , registry);
             }
         }
 

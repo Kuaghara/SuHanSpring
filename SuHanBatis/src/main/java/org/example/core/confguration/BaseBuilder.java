@@ -237,7 +237,7 @@ public abstract class BaseBuilder {
         if (en.getTransactionFactory() == null) {
             throw new RuntimeException("对配置类验证时环境中的事务工厂为空");
         }
-        if (ar.getAliasCount() == 0) {
+        if (ar == null) {
             throw new RuntimeException("对配置类验证时别名为空");
         }
         return config;
@@ -317,8 +317,6 @@ public abstract class BaseBuilder {
                 type == Short.class || type == short.class ||
                 type == Byte.class || type == byte.class;
     }
-// ... existing code ...
-
 
 
 }

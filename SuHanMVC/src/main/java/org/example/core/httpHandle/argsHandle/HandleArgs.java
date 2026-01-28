@@ -6,7 +6,7 @@ import java.lang.reflect.Parameter;
 
 public interface HandleArgs {
 
-    boolean support(HttpExchange exchange , Parameter parameters);
+    boolean support(HttpExchange exchange, Parameter parameters);
 
-    Object handle(HttpExchange exchange, Parameter  parameter);
+    Object handle(HttpExchange exchange, Parameter parameter);
 }

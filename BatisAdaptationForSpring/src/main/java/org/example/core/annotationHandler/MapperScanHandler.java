@@ -17,7 +17,7 @@ import java.util.Objects;
 public class MapperScanHandler {
     public Map<String, BeanDefinition> parseMapperScan(Class<?> clazz, BeanDefinitionRegistry registry, BeanDefinition bd) {
         Map<String, BeanDefinition> mapperBdm = new HashMap<>();
-        List<Annotation> annonationsList = AnnotationUtil.getAnnonationsList(bd, registry);
+        List<Annotation> annonationsList = AnnotationUtil.getAnnonationsList(bd);
         for (Annotation annotation : annonationsList) {
             if (annotation.annotationType().equals(MapperScan.class)) {
                 MapperScan mapperScan = (MapperScan) annotation;

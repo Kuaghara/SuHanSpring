@@ -12,5 +12,5 @@ public interface AbstractFactory {
 
     Object instantiationBean(BeanDefinition bd);
 
-    Object getSingleton(String name , ObjectFactory<?> singletonFactory);
+    Object getSingleton(String name, ObjectFactory<?> singletonFactory);
 }

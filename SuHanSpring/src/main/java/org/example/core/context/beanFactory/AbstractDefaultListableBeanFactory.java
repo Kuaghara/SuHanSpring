@@ -1,11 +1,9 @@
 package org.example.core.context.beanFactory;
 
 import org.example.core.annotation.Autowired;
-import org.example.core.beanAware.BeanClassAware;
-import org.example.core.beanAware.BeanLazyAware;
-import org.example.core.beanAware.BeanNameAware;
-import org.example.core.beanAware.BeanScopeAware;
+import org.example.core.beanAware.*;
 import org.example.core.beanPostProcessor.*;
+import org.example.core.context.ApplicationContext;
 import org.example.core.informationEntity.AutoElement;
 import org.example.core.informationEntity.AutowiredConstructorElement;
 import org.example.core.informationEntity.BeanDefinition;
@@ -139,6 +137,13 @@ public class AbstractDefaultListableBeanFactory implements AbstractFactory {
         Constructor<?>[] constructors = null;
         Object bean = null;
         try {
+            Method method = bd.getBeanMethod();
+            if (method != null && bd.getConfigurationClassName() != null) {
+                Object configBean = this.doGetBean(bd.getConfigurationClassName());
+                Object[] args = resolveMethodArgs(method);
+                return method.invoke(configBean, args);
+            }
+
             constructors = bd.getClazz().getConstructors();
             Constructor<?> theConstructor = null;
 
@@ -169,13 +174,7 @@ public class AbstractDefaultListableBeanFactory implements AbstractFactory {
                 if(args.length == 0  && bd.getConfigurationClassName() == null){
                     throw new RuntimeException("未找到构造方法，并且不是在配置类中注册的bean");
                 }
-                Method method = bd.getBeanMethod();
-                if (method != null && bd.getConfigurationClassName() != null) {
-                    Object configBean = this.doGetBean(bd.getConfigurationClassName());
-                    bean = method.invoke(configBean);
-                } else {
-                    bean = theConstructor.newInstance(args);
-                }
+                bean = theConstructor.newInstance(args);
             }
 
         } catch (InstantiationException | IllegalAccessException e) {
@@ -196,6 +195,7 @@ public class AbstractDefaultListableBeanFactory implements AbstractFactory {
                 mbp.postProcessMergedBeanDefinition(beanDefinition, beanType, beanName);
             }
         }
+
     }
 
     /// 依赖注入
@@ -280,6 +280,16 @@ public class AbstractDefaultListableBeanFactory implements AbstractFactory {
 
         if (bean instanceof BeanLazyAware) {
             ((BeanLazyAware) bean).beanLazyAware(bd.isLazy());
+        }
+        if (bean instanceof ApplicationAware ba){
+            ba.applicationAware(registry.getApplicationContext());
+        }
+    }
+
+    /// 没法了，加个这个给工具吧
+    public void applyAware(Object object){
+        if( object instanceof ApplicationAware){
+            ((ApplicationAware) object).applicationAware(registry.getApplicationContext());
         }
     }
 
@@ -442,6 +452,30 @@ public class AbstractDefaultListableBeanFactory implements AbstractFactory {
                 }
                 args[i] = temp;
             }
+        }
+        return args;
+    }
+
+    private Object[] resolveMethodArgs(Method method) {
+        Parameter[] parameters = method.getParameters();
+        Object[] args = new Object[parameters.length];
+        for (int i = 0; i < parameters.length; i++) {
+            Class<?> paramType = parameters[i].getType();
+            String beanName = paramType.getSimpleName();
+            Object dependency = registry.getSingleton(beanName);
+            if (dependency == null) {
+                dependency = registry.getEarlyBean(beanName);
+            }
+            if (dependency == null && registry.containsBeanDefinition(beanName)) {
+                dependency = registry.getBean(beanName);
+            }
+            if (dependency == null) {
+                dependency = getDefaultValueForPrimitiveType(paramType);
+            }
+            if (dependency == null) {
+                throw new RuntimeException("Missing @Bean method dependency: " + paramType.getName());
+            }
+            args[i] = dependency;
         }
         return args;
     }

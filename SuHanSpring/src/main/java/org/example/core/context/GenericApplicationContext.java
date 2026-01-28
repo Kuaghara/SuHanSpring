@@ -1,6 +1,7 @@
 package org.example.core.context;
 
 import org.example.core.context.beanFactory.BeanDefinitionRegistry;
+import org.example.core.context.beanFactory.BeanFactory;
 import org.example.core.context.beanFactory.DefaultListableBeanFactory;
 import org.example.core.informationEntity.BeanDefinition;
 
@@ -10,10 +11,11 @@ import java.util.Map;
 public class GenericApplicationContext extends AbstractApplicationContext implements BeanDefinitionRegistry {
 
     private final DefaultListableBeanFactory beanFactory;
+    private Environment environment;
     ClassLoader classLoader;
 
     public GenericApplicationContext() {
-        this.beanFactory = new DefaultListableBeanFactory();
+        this.beanFactory = new DefaultListableBeanFactory(this);
     }
 
     @Override
@@ -59,5 +61,20 @@ public class GenericApplicationContext extends AbstractApplicationContext implem
     @Override
     public List<BeanDefinition> getBeanDefinitionList() {
         return beanFactory.getBeanDefinitionList();
+    }
+
+    @Override
+    public Environment getEnvironment() {
+        return environment;
+    }
+
+    @Override
+    public BeanFactory getFactory() {
+        return this;
+    }
+
+    @Override
+    public void addBean(String name , Object bean) {
+        beanFactory.addBean(name,bean);
     }
 }

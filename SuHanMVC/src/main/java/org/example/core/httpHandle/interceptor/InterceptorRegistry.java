@@ -12,21 +12,22 @@ public class InterceptorRegistry {
     List<String> pathPatterns;
     List<String> excludePathPatterns;
 
-    public InterceptorRegistry(HandlerInterceptor interceptor){
+    public InterceptorRegistry(HandlerInterceptor interceptor) {
         this.interceptor = interceptor;
     }
 
 
-    public InterceptorRegistry addPathPatterns(String pathPattern){
-            this.pathPatterns.add(pathPattern);
-            return this;
-    }
-    public InterceptorRegistry excludePathPatterns(String pathPattern){
-            this.excludePathPatterns.add(pathPattern);
-            return this;
+    public InterceptorRegistry addPathPatterns(String pathPattern) {
+        this.pathPatterns.add(pathPattern);
+        return this;
     }
 
-    public void doHandle(HttpExchange  exchange, Object handler, ModelAndView modelAndView, Exception ex, Method method){
+    public InterceptorRegistry excludePathPatterns(String pathPattern) {
+        this.excludePathPatterns.add(pathPattern);
+        return this;
+    }
+
+    public void doHandle(HttpExchange exchange, Object handler, ModelAndView modelAndView, Exception ex, Method method) {
         try {
             interceptor.preHandle(exchange, handler);
 
@@ -37,10 +38,10 @@ public class InterceptorRegistry {
         }
     }
 
-    public boolean doPreHandle(HttpExchange  exchange, Object handler) {
+    public boolean doPreHandle(HttpExchange exchange, Object handler) {
         try {
             boolean next = interceptor.preHandle(exchange, handler);
-            if(next){
+            if (next) {
                 return true;
             }
         } catch (Exception e) {
@@ -48,14 +49,16 @@ public class InterceptorRegistry {
         }
         return false;
     }
-    public void doPostHandle(HttpExchange  exchange, Object handler, ModelAndView modelAndView) {
+
+    public void doPostHandle(HttpExchange exchange, Object handler, ModelAndView modelAndView) {
         try {
-            interceptor.postHandle(exchange, handler,modelAndView );
+            interceptor.postHandle(exchange, handler, modelAndView);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
     }
-    public void doAfterCompletion(HttpExchange  exchange, Object handler, Exception ex) {
+
+    public void doAfterCompletion(HttpExchange exchange, Object handler, Exception ex) {
         try {
             interceptor.afterCompletion(exchange, handler, ex);
         } catch (Exception e) {

@@ -8,7 +8,7 @@ public class ResultMap {
     String type; //映射的实体类
     String idPropertyInXml; // 标签id中实体类的属性名
     String idColumnInXml; //标签id中数据库的列名
-    Map<String , String > result = new HashMap<>(); //用于存储result标签的映射关系
+    Map<String, String> result = new HashMap<>(); //用于存储result标签的映射关系
 
     public String getId() {
         return id;

@@ -14,7 +14,7 @@ public class Main {
     public static void main(String[] args) throws FileNotFoundException {
         SqlSessionFactory sqlSessionFactory = new SqlSessionFactoryBuilder().build(new FileInputStream("SuHanBatis/src/main/resources/mybatis-config.xml"));
 
-        try(SqlSession sqlSession = sqlSessionFactory.openSession(false)){
+        try (SqlSession sqlSession = sqlSessionFactory.openSession(false)) {
             TestMapper mapper = sqlSession.getMapper(TestMapper.class);
             User user = mapper.getUserById(1);
             System.out.println(user);

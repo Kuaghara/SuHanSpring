@@ -6,13 +6,14 @@ import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.List;
 
+/// 这个类我咋不记得了？？？
+/// 想起来了，mybatis的数据要传输到这里，然后再对数据进行注册啥的
 public class Configuration {
-    private Environment environment;
-    private PooledDataSource pooledDataSource;
-    private AliasRegistry aliasRegistry = null ;
-
     List<String> mapperPathList = new ArrayList<>();
     List<Mapper> mapperList = new ArrayList<>();
+    private Environment environment;
+    private PooledDataSource pooledDataSource;
+    private AliasRegistry aliasRegistry = null;
 
     public Configuration() {
         this(new Environment(), new PooledDataSource(), new AliasRegistry());
@@ -22,36 +23,41 @@ public class Configuration {
         this(environment, new PooledDataSource(), new AliasRegistry());
     }
 
-    public Configuration(Environment environment, PooledDataSource pooledDataSource){
+    public Configuration(Environment environment, PooledDataSource pooledDataSource) {
         this(environment, pooledDataSource, new AliasRegistry());
     }
 
-    public Configuration(Environment environment, PooledDataSource pooledDataSource, AliasRegistry aliasRegistry){
+    public Configuration(Environment environment, PooledDataSource pooledDataSource, AliasRegistry aliasRegistry) {
         this.environment = environment;
         this.pooledDataSource = pooledDataSource;
         this.aliasRegistry = aliasRegistry;
     }
 
-    public void setEnvironment(Environment environment){
-        this.environment = environment;
-        this.pooledDataSource = (PooledDataSource) environment.getDataSource();
-    }
-
-    public void addMappers(String packagePath){
+    public void addMappers(String packagePath) {
         mapperPathList.add(packagePath);
     }
-    public void addMapper(Mapper mapper){
+
+    public void addMapper(Mapper mapper) {
         mapperList.add(mapper);
     }
-    public List<Mapper> getMapperList(){
+
+    public List<Mapper> getMapperList() {
         return mapperList;
     }
-    public AliasRegistry getTypeAliasRegistry(){
+
+    public AliasRegistry getTypeAliasRegistry() {
         return aliasRegistry;
     }
 
     public Environment getEnvironment() {
         return environment;
+    }
+
+    public void setEnvironment(Environment environment) {
+        this.environment = environment;
+        if (environment.getDataSource() instanceof PooledDataSource) {
+            this.pooledDataSource = (PooledDataSource) environment.getDataSource();
+        }
     }
 
     public PooledDataSource getPooledDataSource() {
@@ -60,6 +66,18 @@ public class Configuration {
 
     public void setPooledDataSource(PooledDataSource pooledDataSource) {
         this.pooledDataSource = pooledDataSource;
+        if (this.environment != null) {
+            this.environment.setDataSource(pooledDataSource);
+        }
+    }
+
+    public void setDataSource(javax.sql.DataSource dataSource) {
+        if (dataSource instanceof PooledDataSource) {
+            this.pooledDataSource = (PooledDataSource) dataSource;
+            if (this.environment != null) {
+                this.environment.setDataSource(dataSource);
+            }
+        }
     }
 
     public AliasRegistry getAliasRegistry() {
@@ -73,6 +91,7 @@ public class Configuration {
     public List<String> getMapperPathList() {
         return mapperPathList;
     }
+
     public Connection getConnection() {
         return pooledDataSource.getConnection();
     }

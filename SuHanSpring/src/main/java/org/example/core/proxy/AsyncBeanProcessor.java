@@ -12,21 +12,22 @@ import java.util.List;
 import java.util.Map;
 
 public class AsyncBeanProcessor implements MergedBeanDefinitionPostProcessor {
-    Map<Class<?>,List<Method>> asyncMethods = new HashMap<>();
+    Map<Class<?>, List<Method>> asyncMethods = new HashMap<>();
     Object target = null;
+
     @Override
     public void postProcessMergedBeanDefinition(BeanDefinition beanDefinition, Class<?> beanClass, String beanName) {
-        for(Method method : beanClass.getDeclaredMethods()){
-            if (method.isAnnotationPresent(Async.class)){
+        for (Method method : beanClass.getDeclaredMethods()) {
+            if (method.isAnnotationPresent(Async.class)) {
                 AnnotationResolver annotationResolver = new AnnotationResolver();
-                annotationResolver.parseAsync(beanClass,method);
+                annotationResolver.parseAsync(beanClass, method);
             }
         }
     }
 
     @Override
     public Object postProcessAfterInitialization(Object bean, String beanName) {
-        if(AnnotationResolver.classFilter(bean.getClass())){
+        if (AnnotationResolver.classFilter(bean.getClass())) {
             return new CglibProxyFactory(bean).getProxy();
         }
         return bean;

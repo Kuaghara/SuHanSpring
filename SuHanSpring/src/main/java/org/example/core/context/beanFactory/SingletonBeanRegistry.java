@@ -9,7 +9,7 @@ public interface SingletonBeanRegistry {
 
     boolean containsEarlyBean(String beanName);
 
-    void addEarlyBean(String beanName , Object earlyBean);
+    void addEarlyBean(String beanName, Object earlyBean);
 
     void removeEarlyBean(String beanName);
 
@@ -17,7 +17,7 @@ public interface SingletonBeanRegistry {
 
     void registerEarlyBean(String beanName, Object bean);
 
-    void addFactory(String name , ObjectFactory<Object> factory);
+    void addFactory(String name, ObjectFactory<Object> factory);
 
     void removeFactory(String beanName);
 
