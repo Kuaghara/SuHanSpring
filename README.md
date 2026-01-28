@@ -1,3 +1,3 @@
-# SuHanSpring
+# SuHan-main
 
-自己手敲的javaspring，mybatis，以及mybtais的兼容模块
+自己手敲的javaspring、mybatis、mybatis兼容、MVC、boot实现
