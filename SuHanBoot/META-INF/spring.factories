@@ -1,0 +1,5 @@
+# ?????
+org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
+org.example.autoconfigure.WebMvcAutoConfiguration,\
+org.example.autoconfigure.MyBatisAutoConfiguration,\
+org.example.autoconfigure.DataSourceAutoConfiguration

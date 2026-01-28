@@ -31,7 +31,7 @@ public class DefaultListableBeanFactory implements ConfigurableListableBeanFacto
     private Map<String, ObjectFactory<?>> singletonFactories = new HashMap<>();
     /// 拿来存储父beanFactory
     private BeanFactory parentBeanFactory;
-    /// 存储beanPostProcessor(内部存储的都是生成好的实例)
+    /// 存储beanPostProcessor(内部存储的都是生成好的实�?
     private List<BeanPostProcessor> beanPostProcessors = new ArrayList<>();
     /// 存储抽象工厂
     private AbstractDefaultListableBeanFactory abstractFactory;
@@ -77,7 +77,7 @@ public class DefaultListableBeanFactory implements ConfigurableListableBeanFacto
             return singleton;
         }
         if (!beanDefinitionMap.containsKey(beanName)) {
-            throw new RuntimeException(beanName + "不存在");
+            throw new RuntimeException(beanName + "不存在?");
         }
         Object bean = getSingleton(beanName);
         if (bean == null) {
@@ -94,11 +94,16 @@ public class DefaultListableBeanFactory implements ConfigurableListableBeanFacto
 
     @Override
     public <T> T getBean(Class<T> clazz) {
-            for (Map.Entry<String, Object> entry : singletonObjects.entrySet()) {
-                if (clazz.isInstance(entry.getValue())) {
-                    return (T) entry.getValue();
-                }
+        for (Map.Entry<String, Object> entry : singletonObjects.entrySet()) {
+            if (clazz.isInstance(entry.getValue())) {
+                return (T) entry.getValue();
             }
+        }
+        for (Map.Entry<String, BeanDefinition> entry : beanDefinitionMap.entrySet()) {
+            if (clazz.isAssignableFrom(entry.getValue().getClazz())) {
+                return (T) getBean(entry.getKey());
+            }
+        }
         throw new RuntimeException("此处为获取bean错误");
     }
 
@@ -106,7 +111,7 @@ public class DefaultListableBeanFactory implements ConfigurableListableBeanFacto
     public void preInstantiateSingletons() {
         List<BeanDefinition> bds = new ArrayList<>(beanDefinitionMap.values());
         try {
-            //此处我要添加一个对beanDefinitions的排序
+            //此处我要添加一个对beanDefinitions的排�?
             AnnotationUtil.beanDefinitionSort(bds, this);
             for (BeanDefinition bd : bds) {
                 String bdName = bd.getClassName();
@@ -326,7 +331,7 @@ public class DefaultListableBeanFactory implements ConfigurableListableBeanFacto
         beanPostProcessorReader(beanDefinitionMap);
 
         /*---------此处已视为beanDefinition_Map生成完毕，并没有考虑bean拥有父类------------- */
-        //此处的想法是进行@Autowired注解的扫描和@Aspect注解的扫描
+        //此处的想法是进行@Autowired注解的扫描和@Aspect注解的扫�?
         applySmartInstantiationBeanPostProcessor(true, null);
         //此处将跳跃到abstractFactory
         abstractFactory = new AbstractDefaultListableBeanFactory(this);
@@ -409,3 +414,5 @@ public class DefaultListableBeanFactory implements ConfigurableListableBeanFacto
         return null;
     }
 }
+
+
